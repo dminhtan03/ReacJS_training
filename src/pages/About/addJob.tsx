@@ -107,6 +107,20 @@ class JobStorageService {
     }
   }
 
+  static deleteJob(id: string): boolean {
+    try {
+      const existingJobs = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '[]');
+      const updatedJobs = existingJobs.filter((job: JobFormData) => job.id !== id);
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updatedJobs));
+      
+      console.log('✅ Job deleted successfully:', id);
+      return true;
+    } catch (error) {
+      console.error('❌ Error deleting job:', error);
+      return false;
+    }
+  }
+
   static generateId(): string {
     return Date.now().toString() + Math.random().toString(36).substr(2, 9);
   }
