@@ -4,7 +4,7 @@ import React from "react";
 
 import DashboardPage from "./pages/Dashboard/index";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import AddJobForm from "./pages/About";
+import AddJobForm from "./pages/About/addJob";
 
 // Main App Component
 function App() {
