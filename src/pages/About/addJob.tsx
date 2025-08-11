@@ -23,7 +23,7 @@ const AddJobForm: React.FC = () => {
         <aside>
           <nav>
             <Link to="/">Dashboard</Link>
-            <a href="#">Add Job</a>
+            <Link to="/add-job">Add Job</Link>
             <a href="#">Settings</a>
           </nav>
         </aside>

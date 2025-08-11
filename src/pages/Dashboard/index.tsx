@@ -13,7 +13,7 @@ const DashboardPage: React.FC = () => {
       <div className="container">
         <aside>
           <nav>
-            <a href="#">Dashboard</a>
+            <Link to="/">Dashboard</Link>
             <Link to="/add-job">Add Job</Link>
             <a href="#">Settings</a>
           </nav>
