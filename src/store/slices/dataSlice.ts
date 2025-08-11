@@ -2,7 +2,7 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { ApiError, DemoData } from "../../types";
-import { demoApiService, liveDataService } from "../../services/demoApi";
+// import { demoApiService, liveDataService } from "../../services/demoApi";
 
 // Interface cho data state
 interface DataState {

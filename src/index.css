@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 @media (min-width: 640px) {
   .container-responsive {
     padding-left: 1.5rem;

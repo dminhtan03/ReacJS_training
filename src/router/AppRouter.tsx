@@ -96,19 +96,19 @@ export const routeDefinitions = [
   {
     key: "home",
     path: ROUTES.HOME,
-    label: "Trang chủ",
-    icon: "home",
+    label: "Dashboard",
+    icon: "dashboard",
   },
   {
     key: "about",
     path: ROUTES.ABOUT,
-    label: "Giới thiệu",
+    label: "Add job",
     icon: "info",
   },
   {
     key: "dashboard",
     path: ROUTES.DASHBOARD,
-    label: "Dashboard",
-    icon: "dashboard",
+    label: "Setting",
+    icon: "home",
   },
 ] as const;
