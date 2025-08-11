@@ -63,7 +63,7 @@ const Sidebar: React.FC = () => {
               <Text className="text-white font-bold text-sm">R</Text>
             </div>
             <Text strong className="text-lg">
-              React Base
+              Job Tracker
             </Text>
           </div>
         ) : (

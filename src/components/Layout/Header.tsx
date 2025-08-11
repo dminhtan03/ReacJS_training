@@ -1,19 +1,22 @@
 // ===== HEADER COMPONENT =====
-
 import React from "react";
-import { Layout, Button, Typography, Space, Dropdown, Avatar } from "antd";
-import "./header.css";
-// Header component
-const Header: React.FC<HeaderProps> = () => {
+
+const Header: React.FC = () => {
   return (
-    <header>
-      <div className="logo">JobTracker</div>
-      <nav>
-        <a href="#">Home</a>
-        <a href="#">About</a>
-        <a href="#">Profile</a>
+    <div className="bg-indigo-600 text-white px-8 py-4 flex justify-between items-center">
+      <div className="font-bold text-xl">JobTracker</div>
+      <nav className="flex space-x-6">
+        <a href="#" className="font-medium">
+          Home
+        </a>
+        <a href="#" className="font-medium">
+          About
+        </a>
+        <a href="#" className="font-medium">
+          Profile
+        </a>
       </nav>
-    </header>
+    </div>
   );
 };
 
