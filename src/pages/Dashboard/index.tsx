@@ -1,11 +1,9 @@
 // ===== DASHBOARD PAGE COMPONENT =====
 
 import React, { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../store";
-import type { DemoData, WebSocketMessage } from "../../types";
-import { formatNumber, formatDate } from "../../utils/helpers";
 import Header from "../../components/Layout/Header";
 import "./dashboard.css";
+import { Link } from "react-router-dom";
 // Dashboard page component
 const DashboardPage: React.FC = () => {
   return (
@@ -16,7 +14,7 @@ const DashboardPage: React.FC = () => {
         <aside>
           <nav>
             <a href="#">Dashboard</a>
-            <a href="./AddJob.html">Add Job</a>
+            <Link to="/add-job">Add Job</Link>
             <a href="#">Settings</a>
           </nav>
         </aside>
@@ -32,9 +30,10 @@ const DashboardPage: React.FC = () => {
               <option value="interview">Interview</option>
               <option value="rejected">Rejected</option>
             </select>
-            <a href="./AddJob.html" className="add-job-btn">
+
+            <Link to="/add-job" className="add-job-btn">
               Add Job
-            </a>
+            </Link>
           </div>
 
           <div className="job-list">
