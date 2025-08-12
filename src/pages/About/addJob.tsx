@@ -2,9 +2,10 @@ import React, { useState, useCallback } from "react";
 import { Check, X, Briefcase } from "lucide-react";
 import { Header } from "@/components/Layout";
 import Sidebar from "../../components/Layout/Sidebar";
+import * as jobService from "../../service/jobService"; // Import API service
 // Types
 interface JobFormData {
-  id: string;
+  // id: string;
   company: string;
   position: string;
   status: JobStatus;
@@ -113,28 +114,6 @@ class JobStorageService {
       console.error("❌ Error retrieving jobs:", error);
       return [];
     }
-  }
-
-  static deleteJob(id: string): boolean {
-    try {
-      const existingJobs = JSON.parse(
-        localStorage.getItem(this.STORAGE_KEY) || "[]"
-      );
-      const updatedJobs = existingJobs.filter(
-        (job: JobFormData) => job.id !== id
-      );
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updatedJobs));
-
-      console.log("✅ Job deleted successfully:", id);
-      return true;
-    } catch (error) {
-      console.error("❌ Error deleting job:", error);
-      return false;
-    }
-  }
-
-  static generateId(): string {
-    return Date.now().toString() + Math.random().toString(36).substr(2, 9);
   }
 }
 
@@ -328,12 +307,13 @@ const AddJobForm: React.FC = () => {
       if (hasErrors) {
         setErrors(validationErrors);
         setToast({ message: "Please fix the errors below", type: "error" });
+        setIsSubmitting(false);
         return;
       }
 
       // Prepare job data
       const jobData: JobFormData = {
-        id: JobStorageService.generateId(),
+        // id: JobStorageService.generateId(), // hoặc có thể để backend generate id
         company: formData.company!.trim(),
         position: formData.position!.trim(),
         status: formData.status as JobStatus,
@@ -341,24 +321,20 @@ const AddJobForm: React.FC = () => {
         dateAdded: new Date().toISOString(),
       };
 
-      // Save job
-      const success = JobStorageService.saveJob(jobData);
+      // Gọi API để tạo job
+      await jobService.createJob(jobData);
 
-      if (success) {
-        setToast({
-          message: "Job application added successfully! 🎉",
-          type: "success",
-        });
-        resetForm();
-      } else {
-        setToast({
-          message: "Failed to save job. Please try again.",
-          type: "error",
-        });
-      }
+      setToast({
+        message: "Job application added successfully! 🎉",
+        type: "success",
+      });
+      resetForm();
     } catch (error) {
       console.error("Error submitting form:", error);
-      setToast({ message: "An unexpected error occurred", type: "error" });
+      setToast({
+        message: "Failed to save job. Please try again.",
+        type: "error",
+      });
     } finally {
       setIsSubmitting(false);
     }
