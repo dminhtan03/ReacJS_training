@@ -5,6 +5,7 @@ import JobCard from "@/components/ui/JobCard";
 import Sidebar from "../../components/Layout/Sidebar";
 import ConfirmModal from "../../components/Layout/ConfirmModal";
 import { Check, X } from "lucide-react";
+import EditJobModal from "../../components/Layout/EditJobModal";
 
 import * as jobService from "../../service/jobService"; // Import API service
 
@@ -23,6 +24,8 @@ const DashboardPage: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editJobId, setEditJobId] = useState<string | null>(null);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -92,8 +95,17 @@ const DashboardPage: React.FC = () => {
   };
 
   // Chỉnh sửa job => điều hướng sang trang edit
-  const handleEdit = (id: string) => {
-    navigate(`/edit-job/${id}`);
+  const handleEdit = async (id: string) => {
+    try {
+      // Gọi API để lấy job theo ID
+      const job = await jobService.getJobById(id);
+      console.log("Job cần chỉnh sửa:", job);
+
+      setEditJobId(id);
+      setEditModalOpen(true);
+    } catch (error) {
+      console.error("Không thể lấy job:", error);
+    }
   };
 
   // Lọc theo search và status
@@ -175,6 +187,7 @@ const DashboardPage: React.FC = () => {
                   company={job.company}
                   status={job.status}
                   date={new Date(job.dateAdded).toLocaleDateString()}
+                  notes={job.notes}
                   onEdit={() => handleEdit(job.id)}
                   onDelete={() => {
                     setSelectedJobId(job.id);
@@ -251,7 +264,14 @@ const DashboardPage: React.FC = () => {
               setIsModalOpen(false);
             }}
           />
-
+          <EditJobModal
+            isOpen={editModalOpen}
+            jobId={editJobId}
+            onClose={() => setEditModalOpen(false)}
+            onUpdated={() => {
+              jobService.getJobs().then((data) => setJobs(data));
+            }}
+          />
           {/* Toast */}
           {toast && (
             <Toast
