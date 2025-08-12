@@ -4,9 +4,9 @@ import { Header } from "@/components/Layout";
 import Sidebar from "../../components/Layout/Sidebar";
 import { JobFormData, JobStatus, ValidationErrors } from "@/types/job.types";
 import { JobValidator } from "@/utils/jobValidator";
-import JobStorageService from "@/service/JobStorageService";
 import { FormField, Input, Select, Textarea, Toast } from "@/components/ui";
 
+import * as jobService from "../../service/jobService"; // Import API service
 
 // Main Add Job Form Component
 const AddJobForm: React.FC = () => {
@@ -64,12 +64,13 @@ const AddJobForm: React.FC = () => {
       if (hasErrors) {
         setErrors(validationErrors);
         setToast({ message: "Please fix the errors below", type: "error" });
+        setIsSubmitting(false);
         return;
       }
 
       // Prepare job data
       const jobData: JobFormData = {
-        id: JobStorageService.generateId(),
+        // id: JobStorageService.generateId(), // hoặc có thể để backend generate id
         company: formData.company!.trim(),
         position: formData.position!.trim(),
         status: formData.status as JobStatus,
@@ -77,24 +78,20 @@ const AddJobForm: React.FC = () => {
         dateAdded: new Date().toISOString(),
       };
 
-      // Save job
-      const success = JobStorageService.saveJob(jobData);
+      // Gọi API để tạo job
+      await jobService.createJob(jobData);
 
-      if (success) {
-        setToast({
-          message: "Job application added successfully! 🎉",
-          type: "success",
-        });
-        resetForm();
-      } else {
-        setToast({
-          message: "Failed to save job. Please try again.",
-          type: "error",
-        });
-      }
+      setToast({
+        message: "Job application added successfully! 🎉",
+        type: "success",
+      });
+      resetForm();
     } catch (error) {
       console.error("Error submitting form:", error);
-      setToast({ message: "An unexpected error occurred", type: "error" });
+      setToast({
+        message: "Failed to save job. Please try again.",
+        type: "error",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -226,7 +223,7 @@ const AddJobForm: React.FC = () => {
           </div>
 
           {/* Demo: Show saved jobs count */}
-          {JobStorageService.getAllJobs().length > 0 && (
+          {/* {JobStorageService.getAllJobs().length > 0 && (
             <div className="mt-6 text-center">
               <div className="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-full">
                 <Check className="w-4 h-4 text-green-600 mr-2" />
@@ -237,7 +234,7 @@ const AddJobForm: React.FC = () => {
                 </span>
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Toast notification */}
           {toast && (
