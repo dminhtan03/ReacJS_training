@@ -120,7 +120,7 @@ const DashboardPage: React.FC = () => {
     <div className="w-full">
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 text-gray-900">
-        {/* Sidebar: Hidden on mobile, visible on tablet/desktop */}
+        {/* Sidebar: Hidden on mobile, visible on tablet/desktop */}  
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"

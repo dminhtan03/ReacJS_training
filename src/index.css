@@ -12,15 +12,12 @@
     padding-left: 2rem;
     padding-right: 2rem;
   }
-}@media (max-width: 768px) {
-  /* header {
-    width: 499px;
-    margin: 0 auto;
-  } */
-  /* .custom_container {
-    width: 499px;
-    margin-left: auto;
-    margin-right: auto;
-  } */
+}
+
+@media (max-width: 640px) {
+  select {
+    padding: 8px;
+    font-size: 14px;
+  }
 }
 
