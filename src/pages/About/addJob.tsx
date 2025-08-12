@@ -1,6 +1,8 @@
 import React, { useState, useCallback } from "react";
 import { Check, X, Briefcase } from "lucide-react";
-
+import { Header } from "@/components/Layout";
+import { Link } from "react-router-dom";
+import Sidebar from "../../components/Layout/Sidebar";
 // Types
 interface JobFormData {
   id: string;
@@ -370,139 +372,149 @@ const AddJobForm: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-          <Briefcase className="w-8 h-8 text-blue-600" />
-        </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Add New Job Application
-        </h1>
-        <p className="text-gray-600">
-          Track your job applications and manage your career journey
-        </p>
-      </div>
+    <>
+      <Header />
+      <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 text-gray-900">
+        {/* Sidebar */}
+        <Sidebar />
+        <div className="flex-grow p-6 bg-white mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+              <Briefcase className="w-8 h-8 text-blue-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Add New Job
+            </h1>
+            <p className="text-gray-600">
+              Track your job applications and manage your career journey
+            </p>
+          </div>
 
-      {/* Form */}
-      <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
-        <div className="space-y-6" onKeyDown={handleKeyPress}>
-          <FormField label="Company Name" error={errors.company} required>
-            <Input
-              type="text"
-              placeholder="e.g. Google, Microsoft, Apple..."
-              value={formData.company || ""}
-              onChange={(e) => handleInputChange("company", e.target.value)}
-              error={!!errors.company}
-              disabled={isSubmitting}
-            />
-          </FormField>
+          {/* Form */}
+          <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+            <div className="space-y-6" onKeyDown={handleKeyPress}>
+              <FormField label="Company Name" error={errors.company} required>
+                <Input
+                  type="text"
+                  placeholder="e.g. Google, Microsoft, Apple..."
+                  value={formData.company || ""}
+                  onChange={(e) => handleInputChange("company", e.target.value)}
+                  error={!!errors.company}
+                  disabled={isSubmitting}
+                />
+              </FormField>
 
-          <FormField label="Job Position" error={errors.position} required>
-            <Input
-              type="text"
-              placeholder="e.g. Frontend Developer, Software Engineer..."
-              value={formData.position || ""}
-              onChange={(e) => handleInputChange("position", e.target.value)}
-              error={!!errors.position}
-              disabled={isSubmitting}
-            />
-          </FormField>
+              <FormField label="Job Position" error={errors.position} required>
+                <Input
+                  type="text"
+                  placeholder="e.g. Frontend Developer, Software Engineer..."
+                  value={formData.position || ""}
+                  onChange={(e) =>
+                    handleInputChange("position", e.target.value)
+                  }
+                  error={!!errors.position}
+                  disabled={isSubmitting}
+                />
+              </FormField>
 
-          <FormField label="Application Status" error={errors.status}>
-            <Select
-              options={statusOptions}
-              value={formData.status || "Applied"}
-              onChange={(e) => handleInputChange("status", e.target.value)}
-              error={!!errors.status}
-              disabled={isSubmitting}
-            />
-          </FormField>
+              <FormField label="Application Status" error={errors.status}>
+                <Select
+                  options={statusOptions}
+                  value={formData.status || "Applied"}
+                  onChange={(e) => handleInputChange("status", e.target.value)}
+                  error={!!errors.status}
+                  disabled={isSubmitting}
+                />
+              </FormField>
 
-          <FormField label="Notes" error={errors.notes}>
-            <Textarea
-              rows={4}
-              placeholder="e.g. Interview scheduled for next Monday, Applied through LinkedIn, Salary range 30-40M VND..."
-              value={formData.notes || ""}
-              onChange={(e) => handleInputChange("notes", e.target.value)}
-              error={!!errors.notes}
-              disabled={isSubmitting}
-            />
-            <div className="flex justify-between items-center mt-2">
-              <p className="text-xs text-gray-500">
-                💡 Tip: Press Ctrl + Enter to submit quickly
-              </p>
-              <div
-                className={`text-xs ${
-                  (formData.notes || "").length > 900
-                    ? "text-red-500"
-                    : "text-gray-500"
-                }`}
-              >
-                {(formData.notes || "").length}/1000 characters
+              <FormField label="Notes" error={errors.notes}>
+                <Textarea
+                  rows={4}
+                  placeholder="e.g. Interview scheduled for next Monday, Applied through LinkedIn, Salary range 30-40M VND..."
+                  value={formData.notes || ""}
+                  onChange={(e) => handleInputChange("notes", e.target.value)}
+                  error={!!errors.notes}
+                  disabled={isSubmitting}
+                />
+                <div className="flex justify-between items-center mt-2">
+                  <p className="text-xs text-gray-500">
+                    💡 Tip: Press Ctrl + Enter to submit quickly
+                  </p>
+                  <div
+                    className={`text-xs ${
+                      (formData.notes || "").length > 900
+                        ? "text-red-500"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {(formData.notes || "").length}/1000 characters
+                  </div>
+                </div>
+              </FormField>
+              <div className="flex">
+                {/* Submit Button */}
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className={`w-full py-4 px-6 rounded-lg font-semibold text-white transition-all duration-200 ${
+                    isSubmitting
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      Saving Job Application...
+                    </div>
+                  ) : (
+                    <div className="flex items-center cursor-pointer justify-center">
+                      <Briefcase className="w-5 h-5 mr-2" />
+                      Add Job
+                    </div>
+                  )}
+                </button>
+
+                {/* Reset Button */}
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  disabled={isSubmitting}
+                  className="w-full py-2 px-4 text-gray-600 hover:text-gray-800 transition-colors duration-200 text-sm"
+                >
+                  Clear Form
+                </button>
               </div>
             </div>
-          </FormField>
+          </div>
 
-          {/* Submit Button */}
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className={`w-full py-4 px-6 rounded-lg font-semibold text-white transition-all duration-200 ${
-              isSubmitting
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transform hover:scale-[1.02] active:scale-[0.98]"
-            }`}
-          >
-            {isSubmitting ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Saving Job Application...
+          {/* Demo: Show saved jobs count */}
+          {JobStorageService.getAllJobs().length > 0 && (
+            <div className="mt-6 text-center">
+              <div className="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-full">
+                <Check className="w-4 h-4 text-green-600 mr-2" />
+                <span className="text-green-700 text-sm font-medium">
+                  {JobStorageService.getAllJobs().length} job
+                  {JobStorageService.getAllJobs().length > 1 ? "s" : ""} saved
+                  successfully
+                </span>
               </div>
-            ) : (
-              <div className="flex items-center justify-center">
-                <Briefcase className="w-5 h-5 mr-2" />
-                Add Job Application
-              </div>
-            )}
-          </button>
+            </div>
+          )}
 
-          {/* Reset Button */}
-          <button
-            type="button"
-            onClick={resetForm}
-            disabled={isSubmitting}
-            className="w-full py-2 px-4 text-gray-600 hover:text-gray-800 transition-colors duration-200 text-sm"
-          >
-            Clear Form
-          </button>
+          {/* Toast notification */}
+          {toast && (
+            <Toast
+              message={toast.message}
+              type={toast.type}
+              onClose={() => setToast(null)}
+            />
+          )}
         </div>
       </div>
-
-      {/* Demo: Show saved jobs count */}
-      {JobStorageService.getAllJobs().length > 0 && (
-        <div className="mt-6 text-center">
-          <div className="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-full">
-            <Check className="w-4 h-4 text-green-600 mr-2" />
-            <span className="text-green-700 text-sm font-medium">
-              {JobStorageService.getAllJobs().length} job
-              {JobStorageService.getAllJobs().length > 1 ? "s" : ""} saved
-              successfully
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* Toast notification */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
-    </div>
+    </>
   );
 };
 
