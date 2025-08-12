@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { Check, X, Briefcase } from "lucide-react";
 import { Header } from "@/components/Layout";
-import { Link } from "react-router-dom";
 import Sidebar from "../../components/Layout/Sidebar";
 // Types
 interface JobFormData {

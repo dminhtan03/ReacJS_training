@@ -4,6 +4,8 @@ import Header from "../../components/Layout/Header";
 import JobCard from "@/components/ui/JobCard";
 import JobStorageService from "@/service/JobStorageService";
 import Sidebar from "../../components/Layout/Sidebar";
+import ConfirmModal from "../../components/Layout/ConfirmModal";
+import { Check, X, Briefcase } from "lucide-react";
 interface JobFormData {
   id: string;
   company: string;
@@ -17,6 +19,49 @@ const DashboardPage: React.FC = () => {
   const [jobs, setJobs] = useState<JobFormData[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+
+  interface ToastProps {
+    message: string;
+    type: "success" | "error";
+    onClose: () => void;
+  }
+  const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
+    React.useEffect(() => {
+      const timer = setTimeout(onClose, 5000);
+      return () => clearTimeout(timer);
+    }, [onClose]);
+
+    return (
+      <div
+        className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-sm ${
+          type === "success"
+            ? "bg-green-500 text-white"
+            : "bg-red-500 text-white"
+        }`}
+      >
+        <div className="flex items-center">
+          {type === "success" ? (
+            <Check className="w-5 h-5 mr-2 flex-shrink-0" />
+          ) : (
+            <X className="w-5 h-5 mr-2 flex-shrink-0" />
+          )}
+          <span className="text-sm font-medium">{message}</span>
+          <button
+            onClick={onClose}
+            className="ml-3 hover:opacity-75 transition-opacity"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  };
   const navigate = useNavigate();
 
   // Load jobs from localStorage when component mounts
@@ -29,6 +74,10 @@ const DashboardPage: React.FC = () => {
   const handleDelete = (id: string) => {
     const success = JobStorageService.deleteJob(id);
     if (success) {
+      setToast({
+        message: "Job application deleted successfully! 🎉",
+        type: "success",
+      });
       setJobs(jobs.filter((job) => job.id !== id));
     }
   };
@@ -98,13 +147,34 @@ const DashboardPage: React.FC = () => {
                   status={job.status}
                   date={new Date(job.dateAdded).toLocaleDateString()}
                   onEdit={() => handleEdit(job.id)}
-                  onDelete={() => handleDelete(job.id)}
+                  onDelete={() => {
+                    setSelectedJobId(job.id);
+                    setIsModalOpen(true);
+                  }}
                 />
               ))
             ) : (
               <p className="text-gray-500">No jobs found.</p>
             )}
           </div>
+          <ConfirmModal
+            isOpen={isModalOpen}
+            message="Do you wanna delete this job?"
+            onCancel={() => setIsModalOpen(false)}
+            onConfirm={() => {
+              if (selectedJobId !== null) {
+                handleDelete(selectedJobId);
+              }
+              setIsModalOpen(false);
+            }}
+          />
+          {toast && (
+            <Toast
+              message={toast.message}
+              type={toast.type}
+              onClose={() => setToast(null)}
+            />
+          )}
         </main>
       </div>
     </>
