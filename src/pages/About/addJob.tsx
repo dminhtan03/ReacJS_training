@@ -1,5 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Check, X, Briefcase } from 'lucide-react';
+import { Header } from '@/components/Layout';
+import { Link } from 'react-router-dom';
 
 // Types
 interface JobFormData {
@@ -326,13 +328,38 @@ const AddJobForm: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <>
+    <Header />
+    <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 text-gray-900">
+      <aside className="w-[220px] bg-gray-100 p-4">
+          <nav>
+            <a
+              href="#"
+              className="block px-4 py-3 mb-2 text-gray-700 font-semibold rounded hover:bg-violet-200 hover:text-violet-800 transition"
+            >
+              Dashboard
+            </a>
+            <Link
+              to="/add-job"
+              className="block cursor-pointer px-4 py-3 mb-2 text-gray-700 font-semibold rounded hover:bg-violet-200 hover:text-violet-800 transition"
+            >
+              Add Job
+            </Link>
+            <a
+              href="#"
+              className="block px-4 py-3 mb-2 text-gray-700 font-semibold rounded hover:bg-violet-200 hover:text-violet-800 transition"
+            >
+              Settings
+            </a>
+          </nav>
+        </aside>
+        <div className="flex-grow p-6 bg-white mx-auto">
       {/* Header */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
           <Briefcase className="w-8 h-8 text-blue-600" />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Add New Job Application</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Add New Job</h1>
         <p className="text-gray-600">Track your job applications and manage your career journey</p>
       </div>
 
@@ -391,8 +418,8 @@ const AddJobForm: React.FC = () => {
               </div>
             </div>
           </FormField>
-
-          {/* Submit Button */}
+          <div className='flex'>
+              {/* Submit Button */}
           <button
             type="button"
             onClick={handleSubmit}
@@ -409,9 +436,9 @@ const AddJobForm: React.FC = () => {
                 Saving Job Application...
               </div>
             ) : (
-              <div className="flex items-center justify-center">
+              <div className="flex items-center cursor-pointer justify-center">
                 <Briefcase className="w-5 h-5 mr-2" />
-                Add Job Application
+                Add Job 
               </div>
             )}
           </button>
@@ -425,6 +452,8 @@ const AddJobForm: React.FC = () => {
           >
             Clear Form
           </button>
+          </div>
+          
         </div>
       </div>
 
@@ -449,6 +478,11 @@ const AddJobForm: React.FC = () => {
         />
       )}
     </div>
+    </div>
+    
+      
+    </>
+    
   );
 };
 
