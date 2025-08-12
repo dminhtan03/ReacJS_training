@@ -1,7 +1,6 @@
 import React, { FormEvent } from "react";
 import Header from "../../components/Layout/Header";
-import { Link } from "react-router-dom";
-
+import Sidebar from "../../components/Layout/Sidebar";
 const AddJobForm: React.FC = () => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -21,28 +20,7 @@ const AddJobForm: React.FC = () => {
 
       <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 text-gray-900">
         {/* Sidebar */}
-        <aside className="w-[220px] bg-gray-100 p-4">
-          <nav>
-            <Link
-              to="/"
-              className="block px-4 py-3 mb-2 text-gray-700 font-semibold rounded hover:bg-violet-200 hover:text-violet-800 transition"
-            >
-              Dashboard
-            </Link>
-            <a
-              href="#"
-              className="block px-4 py-3 mb-2 text-gray-700 font-semibold rounded hover:bg-violet-200 hover:text-violet-800 transition"
-            >
-              Add Job
-            </a>
-            <a
-              href="#"
-              className="block px-4 py-3 mb-2 text-gray-700 font-semibold rounded hover:bg-violet-200 hover:text-violet-800 transition"
-            >
-              Settings
-            </a>
-          </nav>
-        </aside>
+        <Sidebar />
 
         {/* Form Container */}
         <div className="flex flex-1 justify-center items-center h-[90vh]">

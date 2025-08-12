@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Header from "../../components/Layout/Header";
 import JobCard from "@/components/ui/JobCard";
 import JobStorageService from "@/service/JobStorageService";
-
+import Sidebar from "../../components/Layout/Sidebar";
 interface JobFormData {
   id: string;
   company: string;
@@ -40,7 +40,7 @@ const DashboardPage: React.FC = () => {
 
   // Filter jobs based on search term and status
   const filteredJobs = jobs.filter((job) => {
-    const matchesSearch = 
+    const matchesSearch =
       job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.position.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus ? job.status === filterStatus : true;
@@ -53,28 +53,7 @@ const DashboardPage: React.FC = () => {
 
       <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 text-gray-900">
         {/* Sidebar */}
-        <aside className="w-[220px] bg-gray-100 p-4">
-          <nav>
-            <a
-              href="#"
-              className="block px-4 py-3 mb-2 text-gray-700 font-semibold rounded hover:bg-violet-200 hover:text-violet-800 transition"
-            >
-              Dashboard
-            </a>
-            <Link
-              to="/add-job"
-              className="block cursor-pointer px-4 py-3 mb-2 text-gray-700 font-semibold rounded hover:bg-violet-200 hover:text-violet-800 transition"
-            >
-              Add Job
-            </Link>
-            <a
-              href="#"
-              className="block px-4 py-3 mb-2 text-gray-700 font-semibold rounded hover:bg-violet-200 hover:text-violet-800 transition"
-            >
-              Settings
-            </a>
-          </nav>
-        </aside>
+        <Sidebar />
 
         {/* Main Content */}
         <main className="flex-grow p-8 bg-white">
