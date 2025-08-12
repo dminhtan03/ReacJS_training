@@ -10,7 +10,6 @@ import AddJobForm from "./pages/About/addJob";
 function App() {
   return (
     <>
-
       <Router>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
