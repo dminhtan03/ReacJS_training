@@ -47,6 +47,7 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
           notes: data.notes,
         });
       });
+      setToast(null); // reset toast when opening modal
     }
   }, [jobId, isOpen]);
 
@@ -70,6 +71,7 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
     try {
       if (jobId) {
         await jobService.updateJob(jobId, formData);
+
         setToast({
           message: "Job application added successfully! 🎉",
           type: "success",
