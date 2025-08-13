@@ -6,6 +6,9 @@ import Sidebar from "../../components/Layout/Sidebar";
 import ConfirmModal from "../../components/Layout/ConfirmModal";
 import { Check, X } from "lucide-react";
 import * as jobService from "../../service/jobService";
+import EditJobModal from "../../components/Layout/EditJobModal";
+
+import * as jobService from "../../service/jobService"; // Import API service
 
 interface JobFormData {
   id: string;
@@ -22,6 +25,8 @@ const DashboardPage: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editJobId, setEditJobId] = useState<string | null>(null);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -89,9 +94,18 @@ const DashboardPage: React.FC = () => {
       });
   };
 
-  // Edit job
-  const handleEdit = (id: string) => {
-    navigate(`/edit-job/${id}`);
+  // Chỉnh sửa job => điều hướng sang trang edit
+  const handleEdit = async (id: string) => {
+    try {
+      // Gọi API để lấy job theo ID
+      const job = await jobService.getJobById(id);
+      console.log("Job cần chỉnh sửa:", job);
+
+      setEditJobId(id);
+      setEditModalOpen(true);
+    } catch (error) {
+      console.error("Không thể lấy job:", error);
+    }
   };
 
   // Filter jobs
@@ -120,7 +134,7 @@ const DashboardPage: React.FC = () => {
     <div className="w-full">
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 text-gray-900">
-        {/* Sidebar: Hidden on mobile, visible on tablet/desktop */}  
+        {/* Sidebar: Hidden on mobile, visible on tablet/desktop */}
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -180,6 +194,7 @@ const DashboardPage: React.FC = () => {
                   company={job.company}
                   status={job.status}
                   date={new Date(job.dateAdded).toLocaleDateString()}
+                  notes={job.notes}
                   onEdit={() => handleEdit(job.id)}
                   onDelete={() => {
                     setSelectedJobId(job.id);
@@ -246,6 +261,14 @@ const DashboardPage: React.FC = () => {
                 handleDelete(selectedJobId);
               }
               setIsModalOpen(false);
+            }}
+          />
+          <EditJobModal
+            isOpen={editModalOpen}
+            jobId={editJobId}
+            onClose={() => setEditModalOpen(false)}
+            onUpdated={() => {
+              jobService.getJobs().then((data) => setJobs(data));
             }}
           />
           {/* Toast */}

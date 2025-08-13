@@ -5,6 +5,7 @@ interface JobCardProps {
   company: string;
   status: string;
   date: string;
+  notes: string;
   onEdit?: () => void;
   onDelete?: () => void;
 }
@@ -21,6 +22,7 @@ const JobCard: React.FC<JobCardProps> = ({
   company,
   status,
   date,
+  notes,
   onEdit,
   onDelete,
 }) => {
@@ -37,6 +39,9 @@ const JobCard: React.FC<JobCardProps> = ({
           {status}
         </div>
         <div className="text-xs text-gray-400 mb-4">Applied: {date}</div>
+        <div className="text-sm text-gray-600 mb-2">
+          {notes ? notes : "No notes available"}
+        </div>
       </div>
       <div className="flex justify-end gap-2 mt-auto">
         <button

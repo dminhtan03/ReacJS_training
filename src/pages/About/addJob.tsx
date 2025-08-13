@@ -217,9 +217,9 @@ const AddJobForm: React.FC = () => {
                   type="button"
                   onClick={resetForm}
                   disabled={isSubmitting}
-                  className={`flex-1 py-3 px-4 rounded-lg text-gray-600 hover:text-gray-800 text-sm sm:text-base transition-colors duration-200 ${
-                    isSubmitting ? "cursor-not-allowed" : "cursor-pointer"
-                  }`}
+                  className={`w-full py-2 px-4 cursor-pointer text-gray-600 hover:text-gray-800 transition-colors duration-200 text-sm ${
+                    !isSubmitting ? "cursor-pointer" : ""
+                  } `}
                 >
                   Clear Form
                 </button>
