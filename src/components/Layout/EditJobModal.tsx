@@ -3,6 +3,8 @@ import { Briefcase, X } from "lucide-react";
 import { FormField, Input, Select, Textarea, Toast } from "@/components/ui";
 
 import * as jobService from "@/service/jobService";
+import { JobValidator } from "@/utils/jobValidator";
+import { JobFormData, ValidationErrors } from "@/types/job.types";
 
 interface EditJobModalProps {
   isOpen: boolean;
@@ -24,14 +26,14 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
   onClose,
   onUpdated,
 }) => {
-  const [formData, setFormData] = useState({
-    company: "",
-    position: "",
-    status: "Applied",
-    notes: "",
-  });
+  const [formData, setFormData] = useState<Partial<JobFormData>>({
+      company: "",
+      position: "",
+      status: "Applied",
+      notes: "",
+    });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [errors, setErrors] = useState<ValidationErrors>({});
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -47,7 +49,7 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
           notes: data.notes,
         });
       });
-      setToast(null); // reset toast when opening modal
+      setToast(null);
     }
   }, [jobId, isOpen]);
 
@@ -55,20 +57,26 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const validate = () => {
-    let newErrors: { [key: string]: string } = {};
-    if (!formData.company.trim())
-      newErrors.company = "Company name is required";
-    if (!formData.position.trim())
-      newErrors.position = "Job position is required";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const clearData = () => {
+    setFormData({
+      company: "",
+      position: "",
+      status: "Applied",
+      notes: "",
+    })
+  }
 
   const handleSubmit = async () => {
-    if (!validate()) return;
     setIsSubmitting(true);
     try {
+      const validationErrors = JobValidator.validateForm(formData);
+      const hasErrors = Object.values(validationErrors).some((error) => error);
+      if (hasErrors) {
+        setErrors(validationErrors);
+        setToast({ message: "Please fix the errors below", type: "error" });
+        setIsSubmitting(false);
+        return;
+      }
       if (jobId) {
         await jobService.updateJob(jobId, formData);
 
@@ -80,6 +88,7 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
         setTimeout(() => {
           onUpdated(); // reload job list
           onClose();
+          clearData();
         }, 2000);
       }
     } catch (error) {
@@ -89,17 +98,24 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
     }
   };
 
+  const handleClose = () => {
+    clearData();
+    setErrors({});
+    setToast(null);
+    onClose();
+  }
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center " style={{backgroundColor: "rgba(0,0,0,0.5)"}}>
+      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl custom_desktop relative">
         {/* Close Button */}
         <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          onClick={handleClose}
+          className="absolute cursor-pointer top-4 right-4 text-gray-500 hover:text-gray-700"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5 cursor-pointer" />
         </button>
 
         {/* Header */}
@@ -160,15 +176,15 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
               className={`flex-1 py-3 px-6 rounded-lg font-semibold text-white transition ${
                 isSubmitting
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
+                  : "bg-indigo-600 cursor-pointer hover:bg-indigo-700"
               }`}
             >
               {isSubmitting ? "Updating..." : "Update Job"}
             </button>
             <button
               type="button"
-              onClick={onClose}
-              className="flex-1 py-3 px-6 rounded-lg font-semibold border border-gray-300 text-gray-700 hover:bg-gray-100"
+              onClick={handleClose}
+              className="flex-1 py-3 px-6 rounded-lg cursor-pointer font-semibold border border-gray-300 text-gray-700 hover:bg-gray-100"
             >
               Cancel
             </button>

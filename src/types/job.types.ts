@@ -1,18 +1,26 @@
 export interface JobFormData {
     id: string;
-    company : string;
+    company : string | undefined;
     position: string;
     status: JobStatus;
     notes: string;
     dateAdded: string;
+    employeeName: string;
+    email: string;
+    phoneNumber: string;
+    submittedBy: string;
+    approvedBy: string;
 }
-export type JobStatus = "Applied" | "Interview" | "Offer" | "Rejected";
+export type JobStatus = "Applied" | "Interview" | "Offer" | "Rejected" | "Pending" | "Approved";
 
 export interface ValidationErrors {
     company?: string;
     position?: string;
     status?: string;
     notes?: string;
+    email?: string;
+    phoneNumber?: string;
+    employeeName?: string;
 
 }
 

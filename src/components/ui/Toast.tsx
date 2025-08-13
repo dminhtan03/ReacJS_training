@@ -11,7 +11,7 @@ export const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
 
   return (
     <div
-      className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-sm ${
+      className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-1001 max-w-sm ${
         type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"
       }`}
     >

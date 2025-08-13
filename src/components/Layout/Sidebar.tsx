@@ -49,7 +49,7 @@ const Sidebar: React.FC = () => {
           className={getLinkClass("/")}
           title={isCollapsed ? "Dashboard" : ""}
         >
-          {isCollapsed ? "🏠" : "Dashboard"}
+          {isCollapsed ? "🏠" : "🏠 Dashboard"}
         </Link>
         
         <Link
@@ -57,7 +57,7 @@ const Sidebar: React.FC = () => {
           className={getLinkClass("/add-job")}
           title={isCollapsed ? "Add Job" : ""}
         >
-          {isCollapsed ? "➕" : "Add Job"}
+          {isCollapsed ? "➕" : "➕ Add Job"}
         </Link>
         
         <Link
@@ -65,7 +65,7 @@ const Sidebar: React.FC = () => {
           className={getLinkClass("/settings")}
           title={isCollapsed ? "Settings" : ""}
         >
-          {isCollapsed ? "⚙️" : "Settings"}
+          {isCollapsed ? "⚙️" : "⚙️ Settings"}
         </Link>
       </nav>
     </aside>
