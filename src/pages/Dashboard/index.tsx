@@ -6,6 +6,8 @@ import Sidebar from "../../components/Layout/Sidebar";
 import ConfirmModal from "../../components/Layout/ConfirmModal";
 import { Check, X } from "lucide-react";
 import * as jobService from "../../service/jobService";
+import EditJobModal from "../../components/Layout/EditJobModal";
+import ScrollToTopButton from "@/components/Layout/ScrollToTop";
 
 interface JobFormData {
   id: string;
@@ -20,8 +22,18 @@ const DashboardPage: React.FC = () => {
   const [jobs, setJobs] = useState<JobFormData[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [sortByDate, setSortByDate] = useState("desc");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editJobId, setEditJobId] = useState<string | null>(null);
+  const statusOptions = [
+    { value: "Pending", label: "✨ Pending" },
+    { value: "Applied", label: "📝 Applied" },
+    { value: "Interview", label: "🎯 Interview" },
+    { value: "Offer", label: "✨ Offer" },
+    { value: "Rejected", label: "❌ Rejected" },
+  ];
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -89,9 +101,16 @@ const DashboardPage: React.FC = () => {
       });
   };
 
-  // Edit job
-  const handleEdit = (id: string) => {
-    navigate(`/edit-job/${id}`);
+  // Chỉnh sửa job => điều hướng sang trang edit
+  const handleEdit = async (id: string) => {
+    try {
+      // Gọi API để lấy job theo ID
+      const job = await jobService.getJobById(id);
+
+      setEditJobId(id);
+      setEditModalOpen(true);
+    } catch (error) {
+    }
   };
 
   // Filter jobs
@@ -103,9 +122,20 @@ const DashboardPage: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // Sort by date
+  const sortedJobs = [...filteredJobs].sort((a,b) => {
+    if(sortByDate === "asc") {
+      return new Date(a.dateAdded).getTime() - new Date(b.dateAdded).getTime();
+    }
+    else if(sortByDate === "desc") {
+      return new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime();
+    }
+    return 0;
+  })
+
   // Pagination
-  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
-  const currentJobs = filteredJobs.slice(
+  const totalPages = Math.ceil(sortedJobs.length / itemsPerPage);
+  const currentJobs = sortedJobs.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -119,8 +149,8 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="w-full">
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 text-gray-900">
-        {/* Sidebar: Hidden on mobile, visible on tablet/desktop */}  
+      <div className="flex min-h-[calc(100vh-64px)] pt-16 bg-gray-50 text-gray-900">
+        {/* Sidebar: Hidden on mobile, visible on tablet/desktop */}
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -158,10 +188,25 @@ const DashboardPage: React.FC = () => {
               }}
             >
               <option value="">All Status</option>
-              <option value="Applied">Applied</option>
+              <option className="custom_option_mobile" value="Pending">Pending</option>
+
+              <option className="custom_option_mobile" value="Applied">Applied</option>
               <option value="Interview">Interview</option>
               <option value="Offer">Offer</option>
               <option value="Rejected">Rejected</option>
+            </select>
+
+            <select
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600"
+              value={sortByDate}
+              onChange={(e) => {
+                setSortByDate(e.target.value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="">Applied date</option>
+              <option value="asc">Increase</option>
+              <option value="desc">Decrease</option>
             </select>
             <Link
               to="/add-job"
@@ -180,6 +225,7 @@ const DashboardPage: React.FC = () => {
                   company={job.company}
                   status={job.status}
                   date={new Date(job.dateAdded).toLocaleDateString()}
+                  notes={job.notes}
                   onEdit={() => handleEdit(job.id)}
                   onDelete={() => {
                     setSelectedJobId(job.id);
@@ -199,7 +245,7 @@ const DashboardPage: React.FC = () => {
               <button
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50 text-sm sm:text-base"
+                className={`px-3 py-1 rounded border border-gray-300 disabled:opacity-50 text-sm sm:text-base ${currentPage > 1 ? "cursor-pointer" : ""}`}
               >
                 Prev
               </button>
@@ -217,7 +263,7 @@ const DashboardPage: React.FC = () => {
                       page !== 1 && <span className="px-2">...</span>}
                     <button
                       onClick={() => goToPage(page)}
-                      className={`px-3 py-1 rounded border text-sm sm:text-base ${
+                      className={`px-3 py-1 rounded cursor-pointer border text-sm sm:text-base ${
                         page === currentPage
                           ? "bg-violet-600 text-white border-violet-600"
                           : "border-gray-300"
@@ -230,7 +276,7 @@ const DashboardPage: React.FC = () => {
               <button
                 onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50 text-sm sm:text-base"
+                className="px-3 py-1 cursor-pointer rounded border border-gray-300 disabled:opacity-50 text-sm sm:text-base"
               >
                 Next
               </button>
@@ -248,6 +294,14 @@ const DashboardPage: React.FC = () => {
               setIsModalOpen(false);
             }}
           />
+          <EditJobModal
+            isOpen={editModalOpen}
+            jobId={editJobId}
+            onClose={() => setEditModalOpen(false)}
+            onUpdated={() => {
+              jobService.getJobs().then((data) => setJobs(data));
+            }}
+          />
           {/* Toast */}
           {toast && (
             <Toast
@@ -257,6 +311,8 @@ const DashboardPage: React.FC = () => {
             />
           )}
         </main>
+      <ScrollToTopButton />
+
       </div>
     </div>
   );
