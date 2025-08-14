@@ -10,6 +10,7 @@ interface JobCardProps {
   onEdit?: () => void;
   onDelete?: () => void;
   role: string;
+  userId: string;
 }
 
 const statusStyles: Record<string, string> = {
@@ -26,7 +27,10 @@ const JobCard: React.FC<JobCardProps> = ({
   onEdit,
   onDelete,
   role,
+  userId,
 }) => {
+  const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
+  const userIdStorage: string | undefined = reduxState?.auth?.id;
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm bg-white dark:bg-gray-800 flex flex-col justify-between transition-transform duration-200 hover:shadow-md dark:hover:shadow-gray-600">
       <div>
@@ -52,8 +56,9 @@ const JobCard: React.FC<JobCardProps> = ({
           {notes ? notes : "No notes available"}
         </p>
       </div>
+
       {/* Nếu không phải USER mới hiển thị nút */}
-      {role !== "USER" && (
+      {(role === "ADMIN" || userId === userIdStorage) && (
         <div className="flex justify-end gap-2 mt-auto">
           <button
             className="bg-[#3B82F6] hover:bg-blue-600 cursor-pointer focus:bg-indigo-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"

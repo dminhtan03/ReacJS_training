@@ -5,6 +5,7 @@ import JobCard from "@/components/ui/JobCard";
 import ScrollToTopButton from "@/components/Layout/ScrollToTop";
 import * as jobService from "../../service/jobService";
 import { Check, X } from "lucide-react";
+
 interface JobFormData {
   id: string;
   company: string;
@@ -15,13 +16,14 @@ interface JobFormData {
   role: string;
   userId: string;
 }
+
 const GetAllJobs: React.FC = () => {
   const [jobs, setJobs] = useState<JobFormData[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [sortByDate, setSortByDate] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // New state for sidebar toggle
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const itemsPerPage = 9;
   const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
   const userRole: string | undefined = reduxState?.auth?.role;
@@ -46,8 +48,8 @@ const GetAllJobs: React.FC = () => {
       <div
         className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-[90%] sm:max-w-sm ${
           type === "success"
-            ? "bg-green-500 text-white"
-            : "bg-red-500 text-white"
+            ? "bg-green-500 text-white dark:bg-green-600"
+            : "bg-red-500 text-white dark:bg-red-600"
         }`}
       >
         <div className="flex items-center">
@@ -67,6 +69,7 @@ const GetAllJobs: React.FC = () => {
       </div>
     );
   };
+
   useEffect(() => {
     jobService
       .getJobs()
@@ -110,15 +113,14 @@ const GetAllJobs: React.FC = () => {
     setCurrentPage(page);
   };
 
-  console.log("Jobs:", userRole);
   return (
-    <div className="w-full">
+    <div className="w-full" style={{ height: "100vh" }}>
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <div className="flex min-h-[calc(100vh-64px)] pt-16 bg-gray-50 text-gray-900">
+      <div className="flex min-h-[calc(100vh-64px)] pt-16 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 dark:border-gray-700">
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out`}
+          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out bg-white dark:bg-gray-800 border-r dark:border-gray-700`}
         >
           <Sidebar />
         </div>
@@ -128,8 +130,8 @@ const GetAllJobs: React.FC = () => {
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
-        <main className="flex-grow p-4 sm:p-6 md:p-8 bg-white">
-          <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
+        <main className="flex-grow p-4 sm:p-6 md:p-8 bg-white dark:bg-gray-900">
+          <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-gray-100">
             All Jobs
           </h1>
           {/* Search & Filter */}
@@ -137,7 +139,7 @@ const GetAllJobs: React.FC = () => {
             <input
               type="text"
               placeholder="Search jobs..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -145,7 +147,7 @@ const GetAllJobs: React.FC = () => {
               }}
             />
             <select
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500"
               value={filterStatus}
               onChange={(e) => {
                 setFilterStatus(e.target.value);
@@ -156,15 +158,13 @@ const GetAllJobs: React.FC = () => {
               <option className="custom_option_mobile" value="Pending">
                 Pending
               </option>
-
               <option className="custom_option_mobile" value="Approved">
                 Approved
               </option>
               <option value="Rejected">Rejected</option>
             </select>
-
             <select
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500"
               value={sortByDate}
               onChange={(e) => {
                 setSortByDate(e.target.value);
@@ -187,60 +187,64 @@ const GetAllJobs: React.FC = () => {
                   status={job.status}
                   date={new Date(job.dateAdded).toLocaleDateString()}
                   notes={job.notes}
-                  role={userRole} // Assuming userId is used to determine role
+                  role={userRole}
                 />
               ))
             ) : (
-              <p className="text-gray-500 col-span-full text-center">
+              <p className="text-gray-500 dark:text-gray-400 col-span-full text-center">
                 No jobs found.
               </p>
             )}
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center mt-6 space-x-2">
-                <button
-                  onClick={() => goToPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={`px-3 py-1 rounded border border-gray-300 disabled:opacity-50 text-sm sm:text-base ${
-                    currentPage > 1 ? "cursor-pointer" : ""
-                  }`}
-                >
-                  Prev
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter(
-                    (page) =>
-                      page === 1 ||
-                      page === totalPages ||
-                      (page >= currentPage - 1 && page <= currentPage + 1)
-                  )
-                  .map((page, index, filtered) => (
-                    <React.Fragment key={page}>
-                      {index > 0 &&
-                        filtered[index - 1] !== page - 1 &&
-                        page !== 1 && <span className="px-2">...</span>}
-                      <button
-                        onClick={() => goToPage(page)}
-                        className={`px-3 py-1 rounded cursor-pointer border text-sm sm:text-base ${
-                          page === currentPage
-                            ? "bg-violet-600 text-white border-violet-600"
-                            : "border-gray-300"
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    </React.Fragment>
-                  ))}
-                <button
-                  onClick={() => goToPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 cursor-pointer rounded border border-gray-300 disabled:opacity-50 text-sm sm:text-base"
-                >
-                  Next
-                </button>
-              </div>
-            )}
           </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-6 space-x-2">
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`px-3 py-1 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                  currentPage > 1 ? "cursor-pointer" : ""
+                }`}
+              >
+                Prev
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(
+                  (page) =>
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - 1 && page <= currentPage + 1)
+                )
+                .map((page, index, filtered) => (
+                  <React.Fragment key={page}>
+                    {index > 0 &&
+                      filtered[index - 1] !== page - 1 &&
+                      page !== 1 && (
+                        <span className="px-2 text-gray-900 dark:text-gray-100">
+                          ...
+                        </span>
+                      )}
+                    <button
+                      onClick={() => goToPage(page)}
+                      className={`px-3 py-1 rounded cursor-pointer border text-sm sm:text-base ${
+                        page === currentPage
+                          ? "bg-violet-600 text-white border-violet-600 dark:bg-violet-500 dark:border-violet-500"
+                          : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  </React.Fragment>
+                ))}
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 cursor-pointer rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              >
+                Next
+              </button>
+            </div>
+          )}
           {/* Toast */}
           {toast && (
             <div className="fixed top-4 right-4 z-[9999]">

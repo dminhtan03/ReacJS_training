@@ -8,14 +8,14 @@ const SettingsPage: React.FC = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
 
   return (
-    <div className="w-full" style={{height: "100vh"}}>
+    <div className="w-full" style={{ height: "100vh" }}>
       <Header />
       <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 pt-16">
         {/* Sidebar */}
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out w-64 md:w-56 bg-white dark:bg-gray-800`}
+          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out bg-white dark:bg-gray-800 border-r dark:border-gray-700`}
         >
           <Sidebar />
         </div>
@@ -29,7 +29,10 @@ const SettingsPage: React.FC = () => {
         )}
 
         {/* Main content */}
-        <div className="flex-grow p-6 mx-auto max-w-4xl" style={{height: "100vh"}}>
+        <div
+          className="flex-grow p-6 mx-auto max-w-4xl"
+          style={{ height: "100vh" }}
+        >
           <h2 className="text-2xl font-bold mb-6">Theme Settings</h2>
           <div className="flex items-center gap-4">
             <span>Light</span>

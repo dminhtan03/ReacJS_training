@@ -152,7 +152,7 @@ const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full dark:bg-gray-900" style={{height: "100vh"}}>
+    <div className="w-full dark:bg-gray-900" style={{ height: "100vh" }}>
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <div className="flex min-h-[calc(100vh-64px)] pt-16 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
         <div
@@ -268,7 +268,9 @@ const DashboardPage: React.FC = () => {
                   <React.Fragment key={page}>
                     {index > 0 &&
                       filtered[index - 1] !== page - 1 &&
-                      page !== 1 && <span className="px-2 dark:text-gray-100">...</span>}
+                      page !== 1 && (
+                        <span className="px-2 dark:text-gray-100">...</span>
+                      )}
                     <button
                       onClick={() => goToPage(page)}
                       className={`px-3 py-1 rounded cursor-pointer border text-sm sm:text-base ${

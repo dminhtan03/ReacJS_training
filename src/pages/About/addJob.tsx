@@ -55,9 +55,9 @@ const AddJobForm: React.FC = () => {
   // Real-time validation function
   const validateField = (field: keyof JobFormData, value: string) => {
     const newErrors = { ...errors };
-    
+
     switch (field) {
-      case 'company':
+      case "company":
         if (!value.trim()) {
           newErrors.company = "Company name is required";
         } else if (value.trim().length < 2) {
@@ -66,8 +66,8 @@ const AddJobForm: React.FC = () => {
           delete newErrors.company;
         }
         break;
-        
-      case 'position':
+
+      case "position":
         if (!value.trim()) {
           newErrors.position = "Job position is required";
         } else if (value.trim().length < 2) {
@@ -76,8 +76,8 @@ const AddJobForm: React.FC = () => {
           delete newErrors.position;
         }
         break;
-        
-      case 'employeeName':
+
+      case "employeeName":
         if (!value.trim()) {
           newErrors.employeeName = "Employee name is required";
         } else if (value.trim().length < 2) {
@@ -86,8 +86,8 @@ const AddJobForm: React.FC = () => {
           delete newErrors.employeeName;
         }
         break;
-        
-      case 'phoneNumber':
+
+      case "phoneNumber":
         if (!value.trim()) {
           newErrors.phoneNumber = "Phone number is required";
         } else if (!/^[\+]?[0-9\s\-\(\)]{8,15}$/.test(value.trim())) {
@@ -96,8 +96,8 @@ const AddJobForm: React.FC = () => {
           delete newErrors.phoneNumber;
         }
         break;
-        
-      case 'email':
+
+      case "email":
         if (!value.trim()) {
           newErrors.email = "Email address is required";
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
@@ -106,26 +106,26 @@ const AddJobForm: React.FC = () => {
           delete newErrors.email;
         }
         break;
-        
-      case 'notes':
+
+      case "notes":
         if (value.length > 1000) {
           newErrors.notes = "Notes cannot exceed 1000 characters";
         } else {
           delete newErrors.notes;
         }
         break;
-        
+
       default:
         break;
     }
-    
+
     setErrors(newErrors);
   };
 
   const handleInputChange = useCallback(
     (field: keyof JobFormData, value: string) => {
       setFormData((prev) => ({ ...prev, [field]: value }));
-      
+
       // Real-time validation
       validateField(field, value);
     },
@@ -142,9 +142,11 @@ const AddJobForm: React.FC = () => {
       phoneNumber: formData.phoneNumber?.trim(),
       email: formData.email?.trim(),
     };
-    
-    const hasRequiredFields = Object.values(requiredFields).every(field => field && field.length > 0);
-    
+
+    const hasRequiredFields = Object.values(requiredFields).every(
+      (field) => field && field.length > 0
+    );
+
     return !hasErrors && hasRequiredFields;
   };
 
@@ -166,11 +168,14 @@ const AddJobForm: React.FC = () => {
     try {
       // Double check validation before submit
       if (!isFormValid()) {
-        setToast({ message: "Please fix all errors before submitting", type: "error" });
+        setToast({
+          message: "Please fix all errors before submitting",
+          type: "error",
+        });
         setIsSubmitting(false);
         return;
       }
-      
+
       const jobData: JobFormData = {
         company: formData.company!.trim(),
         position: formData.position!.trim(),
@@ -219,7 +224,7 @@ const AddJobForm: React.FC = () => {
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out w-64 md:w-56  bg-white dark:bg-gray-800 border-r dark:border-gray-700`}
+          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out bg-white dark:bg-gray-800 border-r dark:border-gray-700`}
         >
           <Sidebar />
         </div>
@@ -241,7 +246,7 @@ const AddJobForm: React.FC = () => {
             </p>
           </div>
           {/* Form */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100 dark:border-gray-700" >
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100 dark:border-gray-700">
             <div className="space-y-6" onKeyDown={handleKeyPress}>
               {/* Company and Position Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -372,7 +377,8 @@ const AddJobForm: React.FC = () => {
                   />
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 gap-2">
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      💡 Tip: Press Ctrl + Enter to submit quickly {!isFormValid() && "(when form is valid)"}
+                      💡 Tip: Press Ctrl + Enter to submit quickly{" "}
+                      {!isFormValid() && "(when form is valid)"}
                     </p>
                     <div
                       className={`text-xs ${
