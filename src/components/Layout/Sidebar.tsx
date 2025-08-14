@@ -5,7 +5,8 @@ import { Link, useLocation } from "react-router-dom";
 const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
-
+  const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
+  const userRole: string | undefined = reduxState?.auth?.role;
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
@@ -29,7 +30,8 @@ const Sidebar: React.FC = () => {
         ${isCollapsed ? "w-16" : "w-[220px]"} 
         bg-gray-100 p-4 transition-all duration-300
         hidden md:block
-      ` }  style={{height: "100vh"}}
+      `}
+      style={{ height: "100vh" }}
     >
       {/* Toggle Button - Only visible on desktop */}
       <button
@@ -40,8 +42,8 @@ const Sidebar: React.FC = () => {
           <Menu className="w-5 h-5" />
         ) : (
           <div className="flex items-center justify-between w-full">
-            <span className="mr-5 font-bold text-xl">MENU</span> <X className="w-5 h-5" />
-
+            <span className="mr-5 font-bold text-xl">MENU</span>{" "}
+            <X className="w-5 h-5" />
           </div>
         )}
       </button>
@@ -55,6 +57,16 @@ const Sidebar: React.FC = () => {
         >
           {isCollapsed ? "🏠" : "🏠 Dashboard"}
         </Link>
+        {/* Chỉ hiển thị nếu là USER */}
+        {userRole === "USER" && (
+          <Link
+            to="/allJobs"
+            className={getLinkClass("/allJobs")}
+            title={isCollapsed ? "All Jobs" : ""}
+          >
+            {isCollapsed ? "📄" : "📄 All Jobs"}
+          </Link>
+        )}
 
         <Link
           to="/add-job"
@@ -63,7 +75,6 @@ const Sidebar: React.FC = () => {
         >
           {isCollapsed ? "➕" : "➕ Add Job"}
         </Link>
-
         <Link
           to="/settings"
           className={getLinkClass("/settings")}

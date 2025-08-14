@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import Header from "../../components/Layout/Header";
-import JobCard from "@/components/ui/JobCard";
 import Sidebar from "../../components/Layout/Sidebar";
-import ConfirmModal from "../../components/Layout/ConfirmModal";
-import { Check, X } from "lucide-react";
-import * as jobService from "../../service/jobService";
-import EditJobModal from "../../components/Layout/EditJobModal";
+import JobCard from "@/components/ui/JobCard";
 import ScrollToTopButton from "@/components/Layout/ScrollToTop";
-
+import * as jobService from "../../service/jobService";
+import { Check, X } from "lucide-react";
 interface JobFormData {
   id: string;
   company: string;
@@ -16,34 +12,24 @@ interface JobFormData {
   status: string;
   notes: string;
   dateAdded: string;
-  userId: string;
   role: string;
+  userId: string;
 }
-
-const DashboardPage: React.FC = () => {
+const GetAllJobs: React.FC = () => {
   const [jobs, setJobs] = useState<JobFormData[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [sortByDate, setSortByDate] = useState("desc");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editJobId, setEditJobId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // New state for sidebar toggle
+  const itemsPerPage = 9;
   const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
-  const userId: string | undefined = reduxState?.auth?.id;
   const userRole: string | undefined = reduxState?.auth?.role;
-  const statusOptions = [
-    { value: "Pending", label: "✨ Pending" },
-    { value: "Approved", label: "📝 Approved" },
-    { value: "Rejected", label: "❌ Rejected" },
-  ];
+  const userId: string | undefined = reduxState?.auth?.id;
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
   } | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // New state for sidebar toggle
-  const itemsPerPage = 9;
 
   // Toast component
   const Toast: React.FC<{
@@ -81,8 +67,6 @@ const DashboardPage: React.FC = () => {
       </div>
     );
   };
-
-  // Load jobs from API
   useEffect(() => {
     jobService
       .getJobs()
@@ -92,31 +76,6 @@ const DashboardPage: React.FC = () => {
       );
   }, []);
 
-  // Delete job
-  const handleDelete = (id: string) => {
-    jobService
-      .deleteJob(id)
-      .then(() => {
-        setJobs((prev) => prev.filter((job) => job.id !== id));
-        setToast({ message: "Job deleted successfully!", type: "success" });
-      })
-      .catch(() => {
-        setToast({ message: "Failed to delete job!", type: "error" });
-      });
-  };
-
-  // Chỉnh sửa job => điều hướng sang trang edit
-  const handleEdit = async (id: string) => {
-    try {
-      // Gọi API để lấy job theo ID
-      const job = await jobService.getJobById(id);
-
-      setEditJobId(id);
-      setEditModalOpen(true);
-    } catch (error) {}
-  };
-
-  // Filter jobs
   const filteredJobs = jobs.filter((job) => {
     const matchesSearch =
       job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -134,11 +93,9 @@ const DashboardPage: React.FC = () => {
     }
     return 0;
   });
-
-  const visibleJobs =
-    userRole === "ADMIN"
-      ? sortedJobs
-      : sortedJobs.filter((job) => String(job.userId) === String(userId));
+  const visibleJobs = sortedJobs.filter(
+    (job) => String(job.userId) !== String(userId)
+  );
 
   // Pagination
   const totalPages = Math.ceil(visibleJobs.length / itemsPerPage);
@@ -153,6 +110,7 @@ const DashboardPage: React.FC = () => {
     setCurrentPage(page);
   };
 
+  console.log("Jobs:", userRole);
   return (
     <div className="w-full">
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
@@ -164,7 +122,6 @@ const DashboardPage: React.FC = () => {
         >
           <Sidebar />
         </div>
-        {/* Overlay for mobile sidebar */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
@@ -173,7 +130,7 @@ const DashboardPage: React.FC = () => {
         )}
         <main className="flex-grow p-4 sm:p-6 md:p-8 bg-white">
           <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
-            My Jobs
+            All Jobs
           </h1>
           {/* Search & Filter */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -218,12 +175,6 @@ const DashboardPage: React.FC = () => {
               <option value="asc">Increase</option>
               <option value="desc">Decrease</option>
             </select>
-            <Link
-              to="/add-job"
-              className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base text-center transition"
-            >
-              Add Job
-            </Link>
           </div>
           {/* Job Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -236,12 +187,7 @@ const DashboardPage: React.FC = () => {
                   status={job.status}
                   date={new Date(job.dateAdded).toLocaleDateString()}
                   notes={job.notes}
-                  role={userRole} // Assuming role is passed to determine if user can edit/delete
-                  onEdit={() => handleEdit(job.id)}
-                  onDelete={() => {
-                    setSelectedJobId(job.id);
-                    setIsModalOpen(true);
-                  }}
+                  role={userRole} // Assuming userId is used to determine role
                 />
               ))
             ) : (
@@ -249,73 +195,52 @@ const DashboardPage: React.FC = () => {
                 No jobs found.
               </p>
             )}
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-6 space-x-2">
+                <button
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1 rounded border border-gray-300 disabled:opacity-50 text-sm sm:text-base ${
+                    currentPage > 1 ? "cursor-pointer" : ""
+                  }`}
+                >
+                  Prev
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(
+                    (page) =>
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                  )
+                  .map((page, index, filtered) => (
+                    <React.Fragment key={page}>
+                      {index > 0 &&
+                        filtered[index - 1] !== page - 1 &&
+                        page !== 1 && <span className="px-2">...</span>}
+                      <button
+                        onClick={() => goToPage(page)}
+                        className={`px-3 py-1 rounded cursor-pointer border text-sm sm:text-base ${
+                          page === currentPage
+                            ? "bg-violet-600 text-white border-violet-600"
+                            : "border-gray-300"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    </React.Fragment>
+                  ))}
+                <button
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 cursor-pointer rounded border border-gray-300 disabled:opacity-50 text-sm sm:text-base"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center mt-6 space-x-2">
-              <button
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`px-3 py-1 rounded border border-gray-300 disabled:opacity-50 text-sm sm:text-base ${
-                  currentPage > 1 ? "cursor-pointer" : ""
-                }`}
-              >
-                Prev
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter(
-                  (page) =>
-                    page === 1 ||
-                    page === totalPages ||
-                    (page >= currentPage - 1 && page <= currentPage + 1)
-                )
-                .map((page, index, filtered) => (
-                  <React.Fragment key={page}>
-                    {index > 0 &&
-                      filtered[index - 1] !== page - 1 &&
-                      page !== 1 && <span className="px-2">...</span>}
-                    <button
-                      onClick={() => goToPage(page)}
-                      className={`px-3 py-1 rounded cursor-pointer border text-sm sm:text-base ${
-                        page === currentPage
-                          ? "bg-violet-600 text-white border-violet-600"
-                          : "border-gray-300"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  </React.Fragment>
-                ))}
-              <button
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1 cursor-pointer rounded border border-gray-300 disabled:opacity-50 text-sm sm:text-base"
-              >
-                Next
-              </button>
-            </div>
-          )}
-          {/* Confirm Modal */}
-          <ConfirmModal
-            isOpen={isModalOpen}
-            message="Do you want to delete this job?"
-            onCancel={() => setIsModalOpen(false)}
-            onConfirm={() => {
-              if (selectedJobId !== null) {
-                handleDelete(selectedJobId);
-              }
-              setIsModalOpen(false);
-            }}
-          />
-          <EditJobModal
-            isOpen={editModalOpen}
-            jobId={editJobId}
-            onClose={() => setEditModalOpen(false)}
-            onUpdated={() => {
-              jobService.getJobs().then((data) => setJobs(data));
-            }}
-            currentUserRole={userRole}
-          />
           {/* Toast */}
           {toast && (
             <div className="fixed top-4 right-4 z-[9999]">
@@ -334,4 +259,4 @@ const DashboardPage: React.FC = () => {
   );
 };
 
-export default DashboardPage;
+export default GetAllJobs;
