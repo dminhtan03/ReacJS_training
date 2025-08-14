@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Header from "../../components/Layout/Header";
 import JobCard from "@/components/ui/JobCard";
 import Sidebar from "../../components/Layout/Sidebar";
@@ -33,9 +33,7 @@ const DashboardPage: React.FC = () => {
   const userRole: string | undefined = reduxState?.auth?.role;
   const statusOptions = [
     { value: "Pending", label: "✨ Pending" },
-    { value: "Applied", label: "📝 Applied" },
-    { value: "Interview", label: "🎯 Interview" },
-    { value: "Offer", label: "✨ Offer" },
+    { value: "Approved", label: "📝 Approved" },
     { value: "Rejected", label: "❌ Rejected" },
   ];
   const [toast, setToast] = useState<{
@@ -45,7 +43,6 @@ const DashboardPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // New state for sidebar toggle
   const itemsPerPage = 9;
-  const navigate = useNavigate();
 
   // Toast component
   const Toast: React.FC<{
@@ -149,7 +146,6 @@ const DashboardPage: React.FC = () => {
     currentPage * itemsPerPage
   );
 
-  console.log("Sorted Jobs:", visibleJobs);
   const goToPage = (page: number) => {
     if (page < 1) page = 1;
     else if (page > totalPages) page = totalPages;
@@ -157,10 +153,9 @@ const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full" >
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <div className="flex min-h-[calc(100vh-64px)] pt-16 bg-gray-50 text-gray-900">
-        {/* Sidebar: Hidden on mobile, visible on tablet/desktop */}
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -204,11 +199,9 @@ const DashboardPage: React.FC = () => {
                 Pending
               </option>
 
-              <option className="custom_option_mobile" value="Applied">
-                Applied
+              <option className="custom_option_mobile" value="Approved">
+                Approved
               </option>
-              <option value="Interview">Interview</option>
-              <option value="Offer">Offer</option>
               <option value="Rejected">Rejected</option>
             </select>
 
@@ -319,15 +312,20 @@ const DashboardPage: React.FC = () => {
             onUpdated={() => {
               jobService.getJobs().then((data) => setJobs(data));
             }}
+            currentUserRole = {userRole}
           />
           {/* Toast */}
           {toast && (
-            <Toast
-              message={toast.message}
-              type={toast.type}
-              onClose={() => setToast(null)}
-            />
-          )}
+                      <div className="fixed top-4 right-4 z-[9999]">
+                        <Toast
+                          message={toast.message}
+                          type={toast.type}
+                          onClose={() => setToast(null)}
+                          className="max-w-[90%] sm:max-w-sm"
+                        />
+                      </div>
+                    )}
+          
         </main>
         <ScrollToTopButton />
       </div>

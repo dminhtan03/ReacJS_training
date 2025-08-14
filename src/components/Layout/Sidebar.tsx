@@ -1,4 +1,4 @@
-import { ArrowBigLeft, Menu } from "lucide-react";
+import { ArrowBigLeft, Menu, X } from "lucide-react";
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -28,7 +28,7 @@ const Sidebar: React.FC = () => {
         ${isCollapsed ? 'w-16' : 'w-[220px]'} 
         bg-gray-100 p-4 transition-all duration-300
         hidden md:block
-      `}
+      ` }  style={{height: "100vh"}}
     >
       {/* Toggle Button - Only visible on desktop */}
       <button
@@ -38,7 +38,10 @@ const Sidebar: React.FC = () => {
         {isCollapsed ? (
           <Menu className="w-5 h-5" />
         ) : (
-          <ArrowBigLeft className="w-5 h-5" />
+          <div className="flex items-center justify-between w-full">
+            <span className="mr-5 font-bold text-xl">MENU</span> <X className="w-5 h-5" />
+
+          </div>
         )}
       </button>
 

@@ -23,7 +23,7 @@ export type JobStatus =
 export interface ValidationErrors {
   company?: string;
   position?: string;
-  status?: string;
+  // status?: string;
   notes?: string;
   email?: string;
   phoneNumber?: string;

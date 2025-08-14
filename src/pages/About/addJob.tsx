@@ -43,9 +43,6 @@ const AddJobForm: React.FC = () => {
 
   // Status options based on user role
   const adminStatusOptions = [
-    { value: "Applied", label: "📝 Applied" },
-    { value: "Interview", label: "🎯 Interview" },
-    { value: "Offer", label: "✨ Offer" },
     { value: "Rejected", label: "❌ Rejected" },
     { value: "Pending", label: "⏳ Pending Approval" },
     { value: "Approved", label: "✅ Approved" },
@@ -55,15 +52,101 @@ const AddJobForm: React.FC = () => {
     { value: "Pending", label: "⏳ Pending Approval" },
   ];
 
+  // Real-time validation function
+  const validateField = (field: keyof JobFormData, value: string) => {
+    const newErrors = { ...errors };
+    
+    switch (field) {
+      case 'company':
+        if (!value.trim()) {
+          newErrors.company = "Company name is required";
+        } else if (value.trim().length < 2) {
+          newErrors.company = "Company name must be at least 2 characters";
+        } else {
+          delete newErrors.company;
+        }
+        break;
+        
+      case 'position':
+        if (!value.trim()) {
+          newErrors.position = "Job position is required";
+        } else if (value.trim().length < 2) {
+          newErrors.position = "Position must be at least 2 characters";
+        } else {
+          delete newErrors.position;
+        }
+        break;
+        
+      case 'employeeName':
+        if (!value.trim()) {
+          newErrors.employeeName = "Employee name is required";
+        } else if (value.trim().length < 2) {
+          newErrors.employeeName = "Name must be at least 2 characters";
+        } else {
+          delete newErrors.employeeName;
+        }
+        break;
+        
+      case 'phoneNumber':
+        if (!value.trim()) {
+          newErrors.phoneNumber = "Phone number is required";
+        } else if (!/^[\+]?[0-9\s\-\(\)]{8,15}$/.test(value.trim())) {
+          newErrors.phoneNumber = "Please enter a valid phone number";
+        } else {
+          delete newErrors.phoneNumber;
+        }
+        break;
+        
+      case 'email':
+        if (!value.trim()) {
+          newErrors.email = "Email address is required";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+          newErrors.email = "Please enter a valid email address";
+        } else {
+          delete newErrors.email;
+        }
+        break;
+        
+      case 'notes':
+        if (value.length > 1000) {
+          newErrors.notes = "Notes cannot exceed 1000 characters";
+        } else {
+          delete newErrors.notes;
+        }
+        break;
+        
+      default:
+        break;
+    }
+    
+    setErrors(newErrors);
+  };
+
   const handleInputChange = useCallback(
     (field: keyof JobFormData, value: string) => {
       setFormData((prev) => ({ ...prev, [field]: value }));
-      if (errors[field]) {
-        setErrors((prev) => ({ ...prev, [field]: undefined }));
-      }
+      
+      // Real-time validation
+      validateField(field, value);
     },
     [errors]
   );
+
+  // Check if form is valid for submit button
+  const isFormValid = () => {
+    const hasErrors = Object.keys(errors).length > 0;
+    const requiredFields = {
+      company: formData.company?.trim(),
+      position: formData.position?.trim(),
+      employeeName: formData.employeeName?.trim(),
+      phoneNumber: formData.phoneNumber?.trim(),
+      email: formData.email?.trim(),
+    };
+    
+    const hasRequiredFields = Object.values(requiredFields).every(field => field && field.length > 0);
+    
+    return !hasErrors && hasRequiredFields;
+  };
 
   const resetForm = () => {
     setFormData({
@@ -81,14 +164,13 @@ const AddJobForm: React.FC = () => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      const validationErrors = JobValidator.validateForm(formData);
-      const hasErrors = Object.values(validationErrors).some((error) => error);
-      if (hasErrors) {
-        setErrors(validationErrors);
-        setToast({ message: "Please fix the errors below", type: "error" });
+      // Double check validation before submit
+      if (!isFormValid()) {
+        setToast({ message: "Please fix all errors before submitting", type: "error" });
         setIsSubmitting(false);
         return;
       }
+      
       const jobData: JobFormData = {
         company: formData.company!.trim(),
         position: formData.position!.trim(),
@@ -124,7 +206,7 @@ const AddJobForm: React.FC = () => {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && e.ctrlKey) {
+    if (e.key === "Enter" && e.ctrlKey && isFormValid()) {
       handleSubmit();
     }
   };
@@ -150,7 +232,16 @@ const AddJobForm: React.FC = () => {
         )}
         <div className="flex-grow p-4 sm:p-6 md:p-8 mx-auto max-w-4xl">
           {/* Header */}
-
+          <div className="text-center mb-6">
+         
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Add Job
+          </h1>
+          <p className="text-gray-600">
+              Add new job to track
+          </p>
+          
+        </div>
           {/* Form */}
           <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100">
             <div className="space-y-6" onKeyDown={handleKeyPress}>
@@ -203,7 +294,7 @@ const AddJobForm: React.FC = () => {
                   >
                     <Input
                       type="text"
-                      placeholder="e.g. John Doe, Jane Smith..."
+                      placeholder="e.g. Hung Le, Le Hung..."
                       value={formData.employeeName || ""}
                       onChange={(e) =>
                         handleInputChange("employeeName", e.target.value)
@@ -241,7 +332,7 @@ const AddJobForm: React.FC = () => {
                 >
                   <Input
                     type="email"
-                    placeholder="e.g. john.doe@company.com"
+                    placeholder="e.g. hungle@mail.com"
                     value={formData.email || ""}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     error={!!errors.email}
@@ -283,7 +374,7 @@ const AddJobForm: React.FC = () => {
                   />
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 gap-2">
                     <p className="text-xs text-gray-500">
-                      💡 Tip: Press Ctrl + Enter to submit quickly
+                      💡 Tip: Press Ctrl + Enter to submit quickly {!isFormValid() && "(when form is valid)"}
                     </p>
                     <div
                       className={`text-xs ${
@@ -304,9 +395,9 @@ const AddJobForm: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !isFormValid()}
                   className={`flex-1 py-3 sm:py-4 cursor-pointer px-6 rounded-lg font-semibold text-white text-sm sm:text-base transition-all duration-200 ${
-                    isSubmitting
+                    isSubmitting || !isFormValid()
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transform hover:scale-[1.02] active:scale-[0.98]"
                   }`}
@@ -340,12 +431,14 @@ const AddJobForm: React.FC = () => {
 
           {/* Toast notification */}
           {toast && (
-            <Toast
-              message={toast.message}
-              type={toast.type}
-              onClose={() => setToast(null)}
-              className="max-w-[90%] sm:max-w-sm z-1001"
-            />
+            <div className="fixed top-4 right-4 z-[9999]">
+              <Toast
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast(null)}
+                className="max-w-[90%] sm:max-w-sm"
+              />
+            </div>
           )}
         </div>
       </div>

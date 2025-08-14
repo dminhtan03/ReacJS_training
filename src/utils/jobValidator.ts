@@ -84,7 +84,6 @@ export class JobValidator {
         return {
             company: this.validateCompany(data.company || ""),
             position: this.validatePosition(data.position || ""),
-            // status: this.validateStatus(data.status || ""),
             notes: this.validateNotes(data.notes || ""),
             email: this.validateEmail(data.email || ""),
             phoneNumber: this.validatePhoneNumber(data.phoneNumber || ""),

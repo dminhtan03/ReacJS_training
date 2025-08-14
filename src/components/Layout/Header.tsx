@@ -32,7 +32,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-indigo-600 fixed top-0 text-white w-full shadow-lg z-1000">
+    <header className="bg-indigo-600 fixed top-0 text-white w-full shadow-lg z-800">
       {/* Main Header */}
       <div className="px-4 md:px-6 lg:px-8 py-3 md:py-4">
         <div className="flex justify-between items-center">

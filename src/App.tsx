@@ -13,8 +13,7 @@ function App() {
     <>
       <Router>
         <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/" element={<DashboardPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/add-job" element={<AddJobForm />} />
         </Routes>

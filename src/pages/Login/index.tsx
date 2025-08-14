@@ -156,8 +156,8 @@ const LoginPage: React.FC = () => {
 
     if (response.ok) {
       const data = await response.json();
-      alert(`Sign-up successful! User ID: ${data.id}. Redirecting to dashboard...`);
-      navigate("/"); // Chuyển hướng sau khi đăng ký thành công
+      alert(`Sign-up successful! User ID: ${data.id}. Redirecting to login page...`);
+      navigate("/login");
     } else {
       const errorData = await response.json();
       setErrors((prev) => ({
@@ -203,7 +203,7 @@ const LoginPage: React.FC = () => {
       });
       
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate("/");
       }, 1000)
     } else {
         setToast({
