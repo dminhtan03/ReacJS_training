@@ -212,14 +212,14 @@ const AddJobForm: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="w-full">
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <div className="flex min-h-[calc(100vh-64px)] pt-15 bg-gray-50 text-gray-900">
+      <div className="flex min-h-[calc(100vh-64px)] pt-15 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         {/* Sidebar: Hidden on mobile, visible on tablet/desktop */}
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out w-64 md:w-56 lg:w-64`}
+          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out w-64 md:w-56  bg-white dark:bg-gray-800 border-r dark:border-gray-700`}
         >
           <Sidebar />
         </div>
@@ -230,20 +230,18 @@ const AddJobForm: React.FC = () => {
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
-        <div className="flex-grow p-4 sm:p-6 md:p-8 mx-auto max-w-4xl">
+        <div className="flex-grow p-4 sm:p-6 md:p-8 mx-auto max-w-4xl " cla>
           {/* Header */}
           <div className="text-center mb-6">
-         
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Add Job
-          </h1>
-          <p className="text-gray-600">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              Add Job
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
               Add new job to track
-          </p>
-          
-        </div>
+            </p>
+          </div>
           {/* Form */}
-          <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100 dark:border-gray-700" >
             <div className="space-y-6" onKeyDown={handleKeyPress}>
               {/* Company and Position Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -257,7 +255,7 @@ const AddJobForm: React.FC = () => {
                     }
                     error={!!errors.company}
                     disabled={isSubmitting}
-                    className="text-sm sm:text-base"
+                    className="text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400"
                   />
                 </FormField>
 
@@ -275,14 +273,14 @@ const AddJobForm: React.FC = () => {
                     }
                     error={!!errors.position}
                     disabled={isSubmitting}
-                    className="text-sm sm:text-base"
+                    className="text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400"
                   />
                 </FormField>
               </div>
 
               {/* Employee Information Section */}
-              <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              <div className="border-t dark:border-gray-700 pt-6">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
                   Contact Information
                 </h3>
 
@@ -301,7 +299,7 @@ const AddJobForm: React.FC = () => {
                       }
                       error={!!errors.employeeName}
                       disabled={isSubmitting}
-                      className="text-sm sm:text-base"
+                      className="text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400"
                     />
                   </FormField>
 
@@ -319,7 +317,7 @@ const AddJobForm: React.FC = () => {
                       }
                       error={!!errors.phoneNumber}
                       disabled={isSubmitting}
-                      className="text-sm sm:text-base"
+                      className="text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400"
                     />
                   </FormField>
                 </div>
@@ -337,14 +335,14 @@ const AddJobForm: React.FC = () => {
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     error={!!errors.email}
                     disabled={isSubmitting}
-                    className="text-sm sm:text-base"
+                    className="text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400"
                   />
                 </FormField>
               </div>
 
               {/* Application Status - Only visible to Admin */}
               {isAdmin && (
-                <div className="border-t pt-6">
+                <div className="border-t dark:border-gray-700 pt-6">
                   <FormField label="Application Status" error={errors.status}>
                     <Select
                       options={adminStatusOptions}
@@ -354,14 +352,14 @@ const AddJobForm: React.FC = () => {
                       }
                       error={!!errors.status}
                       disabled={isSubmitting}
-                      className="text-sm sm:text-base"
+                      className="text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400"
                     />
                   </FormField>
                 </div>
               )}
 
               {/* Notes Section */}
-              <div className="border-t pt-6">
+              <div className="border-t dark:border-gray-700 pt-6">
                 <FormField label="Notes" error={errors.notes}>
                   <Textarea
                     rows={4}
@@ -370,17 +368,17 @@ const AddJobForm: React.FC = () => {
                     onChange={(e) => handleInputChange("notes", e.target.value)}
                     error={!!errors.notes}
                     disabled={isSubmitting}
-                    className="text-sm sm:text-base"
+                    className="text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400"
                   />
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 gap-2">
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       💡 Tip: Press Ctrl + Enter to submit quickly {!isFormValid() && "(when form is valid)"}
                     </p>
                     <div
                       className={`text-xs ${
                         (formData.notes || "").length > 900
-                          ? "text-red-500"
-                          : "text-gray-500"
+                          ? "text-red-500 dark:text-red-400"
+                          : "text-gray-500 dark:text-gray-400"
                       }`}
                     >
                       {(formData.notes || "").length}/1000 characters
@@ -398,8 +396,8 @@ const AddJobForm: React.FC = () => {
                   disabled={isSubmitting || !isFormValid()}
                   className={`flex-1 py-3 sm:py-4 cursor-pointer px-6 rounded-lg font-semibold text-white text-sm sm:text-base transition-all duration-200 ${
                     isSubmitting || !isFormValid()
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transform hover:scale-[1.02] active:scale-[0.98]"
+                      ? "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
+                      : "bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600 focus:ring-4 focus:ring-violet-200 dark:focus:ring-violet-400 transform hover:scale-[1.02] active:scale-[0.98]"
                   }`}
                 >
                   {isSubmitting ? (
@@ -419,7 +417,7 @@ const AddJobForm: React.FC = () => {
                   type="button"
                   onClick={resetForm}
                   disabled={isSubmitting}
-                  className={`flex-1 py-3 px-4 rounded-lg text-gray-600 hover:text-gray-800 bg-gray-200 text-sm sm:text-base transition-colors duration-200 ${
+                  className={`flex-1 py-3 px-4 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 bg-gray-200 dark:bg-gray-700 text-sm sm:text-base transition-colors duration-200 ${
                     isSubmitting ? "cursor-not-allowed" : "cursor-pointer"
                   }`}
                 >
@@ -442,7 +440,7 @@ const AddJobForm: React.FC = () => {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

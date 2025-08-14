@@ -16,7 +16,7 @@ const Sidebar: React.FC = () => {
   };
 
   const getLinkClass = (path: string) => {
-    const baseClass = "block p-2 mb-2 font-semibold rounded transition";
+    const baseClass = "block p-2 mb-2 font-semibold rounded transition dark:text-white";
     const activeClass = "bg-violet-600 text-white";
     const inactiveClass =
       "text-gray-700 hover:bg-violet-200 hover:text-violet-800";
@@ -29,21 +29,20 @@ const Sidebar: React.FC = () => {
       className={`
         ${isCollapsed ? "w-16" : "w-[220px]"} 
         bg-gray-100 p-4 transition-all duration-300
-        hidden md:block
-      `}
-      style={{ height: "100vh" }}
+        hidden md:block dark:bg-[#111827] dark:text-white
+      ` }  style={{height: "100vh"}}
     >
       {/* Toggle Button - Only visible on desktop */}
       <button
         onClick={toggleSidebar}
-        className="w-full flex items-center cursor-pointer justify-center p-2 mb-4 text-gray-600 hover:text-violet-800 hover:bg-violet-200 rounded"
+        className="w-full flex items-center cursor-pointer justify-center p-2 mb-4 dark:text-gray-500 text-gray-600 hover:text-violet-800 hover:bg-violet-200 rounded"
       >
         {isCollapsed ? (
           <Menu className="w-5 h-5" />
         ) : (
           <div className="flex items-center justify-between w-full">
-            <span className="mr-5 font-bold text-xl">MENU</span>{" "}
-            <X className="w-5 h-5" />
+            <span className="mr-5 font-bold text-xl dark:text-white">MENU</span> <X className="w-5 h-5 dark:text-white" />
+
           </div>
         )}
       </button>
