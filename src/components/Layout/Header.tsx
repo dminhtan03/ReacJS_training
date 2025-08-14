@@ -18,6 +18,7 @@ const Header: React.FC = () => {
   const handleLogout = () => {
     dispatch(logout());
     setIsDropdownOpen(false);
+    localStorage.clear();
     navigate("/login");
   };
 

@@ -203,8 +203,8 @@ const LoginPage: React.FC = () => {
       });
       
       setTimeout(() => {
-        navigate("/");
-      }, 2000)
+        navigate("/dashboard");
+      }, 1000)
     } else {
         setToast({
         message: "Email or password are incorrect.",
