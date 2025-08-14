@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Briefcase, X, Shield } from "lucide-react";
 import { FormField, Input, Textarea, Toast } from "@/components/ui";
-
 import * as jobService from "@/service/jobService";
 import { JobValidator } from "@/utils/jobValidator";
 import { JobFormData, ValidationErrors } from "@/types/job.types";
@@ -194,14 +193,14 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-1001 flex items-center justify-center mt-14 "
+      className="fixed inset-0 z-1001 flex items-center justify-center mt-14"
       style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
     >
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl custom_desktop relative max-h[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-2xl custom_desktop relative max-h-[90vh] overflow-y-auto border dark:border-gray-700">
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute cursor-pointer top-4 right-4 text-gray-500 hover:text-gray-700"
+          className="absolute cursor-pointer top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
         >
           <X className="w-5 h-5 cursor-pointer" />
         </button>
@@ -209,24 +208,23 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
         {/* Header */}
         <div className="text-center mb-6">
           <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
-            isAdmin ? 'bg-purple-100' : 'bg-blue-100'
+            isAdmin ? 'bg-purple-100 dark:bg-purple-900' : 'bg-blue-100 dark:bg-blue-900'
           }`}>
             {isAdmin ? (
-              <Shield className="w-8 h-8 text-purple-600" />
+              <Shield className="w-8 h-8 text-purple-600 dark:text-purple-300" />
             ) : (
-              <Briefcase className="w-8 h-8 text-blue-600" />
+              <Briefcase className="w-8 h-8 text-blue-600 dark:text-blue-300" />
             )}
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {isAdmin ? "Update Job Status" : "Edit Job"}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             {isAdmin 
               ? "Update the application status as an administrator"
               : "Update your job application details"
             }
           </p>
-          
         </div>
 
         {/* Form */}
@@ -239,9 +237,8 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
               disabled={isSubmitting || isAdmin}
               readOnly={isAdmin}
               error={!!errors.company}
-              className={isAdmin ? "bg-gray-100 cursor-not-allowed" : ""}
+              className={`text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400 ${isAdmin ? "bg-gray-100 dark:bg-gray-600 cursor-not-allowed" : ""}`}
             />
-           
           </FormField>
 
           <FormField label="Job Position" error={errors.position} required={!isAdmin}>
@@ -252,9 +249,8 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
               disabled={isSubmitting || isAdmin}
               readOnly={isAdmin}
               error={!!errors.position}
-              className={isAdmin ? "bg-gray-100 cursor-not-allowed" : ""}
+              className={`text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400 ${isAdmin ? "bg-gray-100 dark:bg-gray-600 cursor-not-allowed" : ""}`}
             />
-          
           </FormField>
 
           <FormField label="Application Status" error={errors.status} required={isAdmin}>
@@ -263,7 +259,7 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
                 value={formData.status}
                 onChange={(e) => handleInputChange("status", e.target.value)}
                 disabled={isSubmitting}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm sm:text-base"
               >
                 <option value="Pending">Pending</option>
                 <option value="Approved">Approved</option>
@@ -276,13 +272,12 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
                   value={formData.status}
                   readOnly={true}
                   disabled={true}
-                  className="bg-gray-100 cursor-not-allowed"
+                  className="bg-gray-100 dark:bg-gray-600 cursor-not-allowed text-sm sm:text-base border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
                 />
-             
               </div>
             )}
             {!isAdmin && (
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 Status can only be changed by administrators
               </p>
             )}
@@ -295,9 +290,8 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
               onChange={(e) => handleInputChange("notes", e.target.value)}
               disabled={isSubmitting || isAdmin}
               readOnly={isAdmin}
-              className={isAdmin ? "bg-gray-100 cursor-not-allowed" : ""}
+              className={`text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400 ${isAdmin ? "bg-gray-100 dark:bg-gray-600 cursor-not-allowed" : ""}`}
             />
-           
           </FormField>
 
           {/* Buttons */}
@@ -306,12 +300,12 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting || !isFormValid()}
-              className={`flex-1 py-3 px-6 rounded-lg font-semibold text-white transition ${
+              className={`flex-1 py-3 px-6 rounded-lg font-semibold text-white transition text-sm sm:text-base ${
                 isSubmitting || !isFormValid()
-                  ? "bg-gray-400 cursor-not-allowed"
+                  ? "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
                   : isAdmin
-                  ? "bg-purple-600 cursor-pointer hover:bg-purple-700"
-                  : "bg-indigo-600 cursor-pointer hover:bg-indigo-700"
+                  ? "bg-violet-600 cursor-pointer hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600 focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                  : "bg-violet-600 cursor-pointer hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600 focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
               }`}
             >
               {isSubmitting 
@@ -322,22 +316,22 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 py-3 px-6 rounded-lg cursor-pointer font-semibold border border-gray-300 text-gray-700 hover:bg-gray-100"
+              className="flex-1 py-3 px-6 rounded-lg cursor-pointer font-semibold border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm sm:text-base focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
             >
               Cancel
             </button>
           </div>
         </div>
         {toast && (
-                      <div className="fixed top-4 right-4 z-[9999]">
-                        <Toast
-                          message={toast.message}
-                          type={toast.type}
-                          onClose={() => setToast(null)}
-                          className="max-w-[90%] sm:max-w-sm"
-                        />
-                      </div>
-                    )}
+          <div className="fixed top-4 right-4 z-[9999]">
+            <Toast
+              message={toast.message}
+              type={toast.type}
+              onClose={() => setToast(null)}
+              className="max-w-[90%] sm:max-w-sm"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

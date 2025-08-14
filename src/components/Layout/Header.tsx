@@ -32,13 +32,13 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-indigo-600 fixed top-0 text-white w-full shadow-lg z-1000">
+    <header className="bg-indigo-600 dark:bg-[#1f2937] fixed top-0 text-white dark:text-white w-full shadow-lg dark:shadow-gray-700/20 z-1000 transition-colors duration-300">
       {/* Main Header */}
       <div className="px-4 md:px-6 lg:px-8 py-3 md:py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <div
-            className="font-bold text-lg md:text-xl lg:text-2xl cursor-pointer hover:opacity-80 transition-opacity"
+            className="font-bold text-lg md:text-xl lg:text-2xl cursor-pointer hover:opacity-80 transition-opacity text-white dark:text-gray-100"
             onClick={() => handleNavigation("/")}
           >
             JobTracker
@@ -48,14 +48,14 @@ const Header: React.FC = () => {
           <nav className="hidden md:flex space-x-4 lg:space-x-6 items-center">
             <button
               onClick={() => handleNavigation("/")}
-              className="font-medium text-sm lg:text-base hover:text-indigo-200 transition-colors duration-200 px-2 py-1 rounded"
+              className="font-medium cursor-pointer text-sm lg:text-base hover:text-indigo-200 dark:hover:text-gray-300 transition-colors duration-200 px-2 py-1 rounded"
             >
               Home
             </button>
 
             <button
-              onClick={() => handleNavigation("/about")}
-              className="font-medium text-sm lg:text-base hover:text-indigo-200 transition-colors duration-200 px-2 py-1 rounded"
+              onClick={() => handleNavigation("/add-job")}
+              className="font-medium cursor-pointer text-sm lg:text-base hover:text-indigo-200 dark:hover:text-gray-300 transition-colors duration-200 px-2 py-1 rounded"
             >
               About
             </button>
@@ -66,7 +66,7 @@ const Header: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center cursor-pointer gap-2 font-medium text-sm lg:text-base hover:text-indigo-200 px-2 py-1 rounded"
+                  className="flex items-center cursor-pointer gap-2 font-medium text-sm lg:text-base hover:text-indigo-200 dark:hover:text-gray-300 px-2 py-1 rounded"
                 >
                   👋 Chào, {firstName}
                   <svg
@@ -82,10 +82,10 @@ const Header: React.FC = () => {
                   </svg>
                 </button>
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-40 bg-white text-black rounded shadow-lg">
+                  <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 text-black dark:text-gray-100 rounded shadow-lg dark:shadow-gray-900/50 border dark:border-gray-700">
                     <button
                       onClick={handleLogout}
-                      className="block cursor-pointer w-full text-left px-4 py-2 hover:bg-gray-100"
+                      className="block cursor-pointer w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white duration-200"
                     >
                       🚪 Logout
                     </button>
@@ -95,7 +95,7 @@ const Header: React.FC = () => {
             ) : (
               <button
                 onClick={() => handleNavigation("/profile")}
-                className="font-medium text-sm lg:text-base hover:text-indigo-200 transition-colors duration-200 px-2 py-1 rounded"
+                className="font-medium text-sm lg:text-base hover:text-indigo-200 dark:hover:text-gray-300 transition-colors duration-200 px-2 py-1 rounded"
               >
                 Profile
               </button>
@@ -105,7 +105,7 @@ const Header: React.FC = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={toggleMobileMenu}
-            className="md:hidden p-2 rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+            className="md:hidden p-2 rounded-lg hover:bg-indigo-700 dark:hover:bg-gray-800 transition-colors duration-200"
             aria-label="Toggle mobile menu"
           >
             {isMobileMenuOpen ? (
@@ -119,23 +119,29 @@ const Header: React.FC = () => {
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 bg-indigo-700 border-t border-indigo-500 shadow-lg z-50">
+        <div className="md:hidden absolute top-full left-0 right-0 bg-indigo-700 dark:bg-gray-800 border-t border-indigo-500 dark:border-gray-700 shadow-lg dark:shadow-gray-900/50 z-50">
           <nav className="px-4 py-2 space-y-1">
             <button
               onClick={() => handleNavigation("/")}
-              className="block w-full text-left font-medium text-white hover:text-indigo-200 hover:bg-indigo-600 transition-colors duration-200 px-3 py-2 rounded"
+              className="block w-full text-left font-medium text-white dark:text-gray-100 hover:text-indigo-200 dark:hover:text-gray-300 hover:bg-indigo-600 dark:hover:bg-gray-700 transition-colors duration-200 px-3 py-2 rounded"
             >
               🏠 Home
             </button>
             <button
               onClick={() => handleNavigation("/add-job")}
-              className="block w-full text-left font-medium text-white hover:text-indigo-200 hover:bg-indigo-600 transition-colors duration-200 px-3 py-2 rounded"
+              className="block w-full text-left font-medium text-white dark:text-gray-100 hover:text-indigo-200 dark:hover:text-gray-300 hover:bg-indigo-600 dark:hover:bg-gray-700 transition-colors duration-200 px-3 py-2 rounded"
             >
               ➕ Add Job
             </button>
             <button
+              onClick={() => handleNavigation("/settings")}
+              className="block w-full text-left font-medium text-white dark:text-gray-100 hover:text-indigo-200 dark:hover:text-gray-300 hover:bg-indigo-600 dark:hover:bg-gray-700 transition-colors duration-200 px-3 py-2 rounded"
+            >
+              ⚙️ Settings
+            </button>
+            <button
               onClick={() => handleNavigation("/about")}
-              className="block w-full text-left font-medium text-white hover:text-indigo-200 hover:bg-indigo-600 transition-colors duration-200 px-3 py-2 rounded"
+              className="block w-full text-left font-medium text-white dark:text-gray-100 hover:text-indigo-200 dark:hover:text-gray-300 hover:bg-indigo-600 dark:hover:bg-gray-700 transition-colors duration-200 px-3 py-2 rounded"
             >
               ℹ️ About
             </button>
@@ -143,14 +149,14 @@ const Header: React.FC = () => {
             {firstName ? (
               <button
                 onClick={handleLogout}
-                className="block w-full text-left font-medium text-white hover:text-indigo-200 hover:bg-indigo-600 transition-colors duration-200 px-3 py-2 rounded"
+                className="block w-full text-left font-medium text-white dark:text-gray-100 hover:text-indigo-200 dark:hover:text-gray-300 hover:bg-indigo-600 dark:hover:bg-gray-700 transition-colors duration-200 px-3 py-2 rounded"
               >
                 🚪 Logout
               </button>
             ) : (
               <button
                 onClick={() => handleNavigation("/profile")}
-                className="block w-full text-left font-medium text-white hover:text-indigo-200 hover:bg-indigo-600 transition-colors duration-200 px-3 py-2 rounded"
+                className="block w-full text-left font-medium text-white dark:text-gray-100 hover:text-indigo-200 dark:hover:text-gray-300 hover:bg-indigo-600 dark:hover:bg-gray-700 transition-colors duration-200 px-3 py-2 rounded"
               >
                 👤 Profile
               </button>
@@ -158,8 +164,8 @@ const Header: React.FC = () => {
           </nav>
 
           {/* Mobile Menu Footer */}
-          <div className="px-4 py-3 border-t border-indigo-500 bg-indigo-800">
-            <p className="text-xs text-indigo-200 text-center">
+          <div className="px-4 py-3 border-t border-indigo-500 dark:border-gray-700 bg-indigo-800 dark:bg-gray-900">
+            <p className="text-xs text-indigo-200 dark:text-gray-400 text-center">
               JobTracker v1.0 - Track your career journey
             </p>
           </div>
@@ -169,7 +175,7 @@ const Header: React.FC = () => {
       {/* Mobile Menu Backdrop */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-opacity-25 z-30 md:hidden"
+          className="fixed inset-0 bg-opacity-25 dark:bg-opacity-40 z-30 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
           style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
         />

@@ -41,7 +41,7 @@ const DashboardPage: React.FC = () => {
     type: "success" | "error";
   } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // New state for sidebar toggle
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const itemsPerPage = 9;
 
   // Toast component
@@ -59,8 +59,8 @@ const DashboardPage: React.FC = () => {
       <div
         className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-[90%] sm:max-w-sm ${
           type === "success"
-            ? "bg-green-500 text-white"
-            : "bg-red-500 text-white"
+            ? "bg-green-500 text-white dark:bg-green-600"
+            : "bg-red-500 text-white dark:bg-red-600"
         }`}
       >
         <div className="flex items-center">
@@ -104,12 +104,10 @@ const DashboardPage: React.FC = () => {
       });
   };
 
-  // Chỉnh sửa job => điều hướng sang trang edit
+  // Edit job
   const handleEdit = async (id: string) => {
     try {
-      // Gọi API để lấy job theo ID
       const job = await jobService.getJobById(id);
-
       setEditJobId(id);
       setEditModalOpen(true);
     } catch (error) {}
@@ -153,25 +151,24 @@ const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full" >
+    <div className="w-full dark:bg-gray-900" style={{height: "100vh"}}>
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <div className="flex min-h-[calc(100vh-64px)] pt-16 bg-gray-50 text-gray-900">
+      <div className="flex min-h-[calc(100vh-64px)] pt-16 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out`}
+          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out bg-white dark:bg-gray-800 border-r dark:border-gray-700`}
         >
           <Sidebar />
         </div>
-        {/* Overlay for mobile sidebar */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
-        <main className="flex-grow p-4 sm:p-6 md:p-8 bg-white">
-          <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
+        <main className="flex-grow p-4 sm:p-6 md:p-8 bg-white dark:bg-gray-900">
+          <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 dark:text-white">
             My Jobs
           </h1>
           {/* Search & Filter */}
@@ -179,7 +176,7 @@ const DashboardPage: React.FC = () => {
             <input
               type="text"
               placeholder="Search jobs..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -187,7 +184,7 @@ const DashboardPage: React.FC = () => {
               }}
             />
             <select
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               value={filterStatus}
               onChange={(e) => {
                 setFilterStatus(e.target.value);
@@ -198,15 +195,13 @@ const DashboardPage: React.FC = () => {
               <option className="custom_option_mobile" value="Pending">
                 Pending
               </option>
-
               <option className="custom_option_mobile" value="Approved">
                 Approved
               </option>
               <option value="Rejected">Rejected</option>
             </select>
-
             <select
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               value={sortByDate}
               onChange={(e) => {
                 setSortByDate(e.target.value);
@@ -219,7 +214,7 @@ const DashboardPage: React.FC = () => {
             </select>
             <Link
               to="/add-job"
-              className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base text-center transition"
+              className="bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base text-center transition"
             >
               Add Job
             </Link>
@@ -243,7 +238,7 @@ const DashboardPage: React.FC = () => {
                 />
               ))
             ) : (
-              <p className="text-gray-500 col-span-full text-center">
+              <p className="text-gray-500 dark:text-gray-400 col-span-full text-center">
                 No jobs found.
               </p>
             )}
@@ -254,9 +249,9 @@ const DashboardPage: React.FC = () => {
               <button
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className={`px-3 py-1 rounded border border-gray-300 disabled:opacity-50 text-sm sm:text-base ${
+                className={`px-3 py-1 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 text-sm sm:text-base ${
                   currentPage > 1 ? "cursor-pointer" : ""
-                }`}
+                } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100`}
               >
                 Prev
               </button>
@@ -271,13 +266,13 @@ const DashboardPage: React.FC = () => {
                   <React.Fragment key={page}>
                     {index > 0 &&
                       filtered[index - 1] !== page - 1 &&
-                      page !== 1 && <span className="px-2">...</span>}
+                      page !== 1 && <span className="px-2 dark:text-gray-100">...</span>}
                     <button
                       onClick={() => goToPage(page)}
                       className={`px-3 py-1 rounded cursor-pointer border text-sm sm:text-base ${
                         page === currentPage
-                          ? "bg-violet-600 text-white border-violet-600"
-                          : "border-gray-300"
+                          ? "bg-violet-600 text-white border-violet-600 dark:bg-violet-500 dark:border-violet-500"
+                          : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                       }`}
                     >
                       {page}
@@ -287,7 +282,7 @@ const DashboardPage: React.FC = () => {
               <button
                 onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 cursor-pointer rounded border border-gray-300 disabled:opacity-50 text-sm sm:text-base"
+                className="px-3 py-1 cursor-pointer rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 Next
               </button>
@@ -312,20 +307,19 @@ const DashboardPage: React.FC = () => {
             onUpdated={() => {
               jobService.getJobs().then((data) => setJobs(data));
             }}
-            currentUserRole = {userRole}
+            currentUserRole={userRole}
           />
           {/* Toast */}
           {toast && (
-                      <div className="fixed top-4 right-4 z-[9999]">
-                        <Toast
-                          message={toast.message}
-                          type={toast.type}
-                          onClose={() => setToast(null)}
-                          className="max-w-[90%] sm:max-w-sm"
-                        />
-                      </div>
-                    )}
-          
+            <div className="fixed top-4 right-4 z-[9999]">
+              <Toast
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast(null)}
+                className="max-w-[90%] sm:max-w-sm"
+              />
+            </div>
+          )}
         </main>
         <ScrollToTopButton />
       </div>
