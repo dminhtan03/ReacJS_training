@@ -17,6 +17,7 @@ const ForbiddenPage = () => {
         <Button type="primary" onClick={() => navigate("/dashboard")}>
           Back to Home
         </Button>
+ 
       </div>
     </div>
   );
