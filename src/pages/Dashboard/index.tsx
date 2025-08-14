@@ -232,6 +232,7 @@ const DashboardPage: React.FC = () => {
                   date={new Date(job.dateAdded).toLocaleDateString()}
                   notes={job.notes}
                   role={userRole}
+                  userId={job.userId}
                   onEdit={() => handleEdit(job.id)}
                   onDelete={() => {
                     setSelectedJobId(job.id);

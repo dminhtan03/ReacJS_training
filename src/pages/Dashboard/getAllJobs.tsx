@@ -110,7 +110,6 @@ const GetAllJobs: React.FC = () => {
     setCurrentPage(page);
   };
 
-  console.log("Jobs:", userRole);
   return (
     <div className="w-full">
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />

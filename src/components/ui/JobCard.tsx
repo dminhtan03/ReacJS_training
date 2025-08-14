@@ -10,6 +10,7 @@ interface JobCardProps {
   onEdit?: () => void;
   onDelete?: () => void;
   role: string;
+  userId: string;
 }
 
 const statusStyles: Record<string, string> = {
@@ -26,7 +27,10 @@ const JobCard: React.FC<JobCardProps> = ({
   onEdit,
   onDelete,
   role,
+  userId
 }) => {
+  const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
+  const userIdStorage: string | undefined = reduxState?.auth?.id;
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm bg-white dark:bg-gray-800 flex flex-col justify-between transition-transform duration-200 hover:shadow-md dark:hover:shadow-gray-600">
       <div>
@@ -45,26 +49,30 @@ const JobCard: React.FC<JobCardProps> = ({
           {notes ? notes : "No notes available"}
         </p>
       </div>
-      <div className="flex justify-end gap-2 mt-auto">
-        <button
-          className="bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600 cursor-pointer focus:bg-violet-700 dark:focus:bg-violet-600 text-white px-3 py-1 rounded text-sm font-medium flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500 dark:focus:ring-violet-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-          onClick={onEdit}
-          title="Edit"
-          aria-label="Edit job"
-        >
-          <Pen className="w-4 h-4" />
-          <span className="hidden sm:inline">Edit</span>
-        </button>
-        <button
-          className="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 cursor-pointer focus:bg-red-700 dark:focus:bg-red-600 text-white px-3 py-1 rounded text-sm font-medium flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-          onClick={onDelete}
-          title="Delete"
-          aria-label="Delete job"
-        >
-          <Trash className="w-4 h-4" />
-          <span className="hidden sm:inline">Delete</span>
-        </button>
-      </div>
+
+      {/* Nếu không phải USER mới hiển thị nút */}
+      {role === "ADMIN" || userId === userIdStorage && (
+        <div className="flex justify-end gap-2 mt-auto">
+          <button
+            className="bg-[#3B82F6] hover:bg-blue-600 cursor-pointer focus:bg-indigo-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            onClick={onEdit}
+            title="Edit"
+            aria-label="Edit job"
+          >
+            <Pen className="w-4 h-4" />
+            <span className="hidden sm:inline">Edit</span>
+          </button>
+          <button
+            className="bg-[#ef4444] hover:bg-red-700 cursor-pointer focus:bg-red-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            onClick={onDelete}
+            title="Delete"
+            aria-label="Delete job"
+          >
+            <Trash className="w-4 h-4" />
+            <span className="hidden sm:inline">Delete</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };
