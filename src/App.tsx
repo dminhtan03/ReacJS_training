@@ -3,19 +3,72 @@
 import React from "react";
 
 import DashboardPage from "./pages/Dashboard/index";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import AddJobForm from "./pages/About/addJob";
 import LoginPage from "./pages/Login";
-
+import PrivateRoute from "./components/common/PrivateRoute";
+import PublicRoute from "./components/common/PublicRoute";
+import NotFoundPage from "./pages/ErrorPage/404";
+import ForbiddenPage from "./pages/ErrorPage/403";
+import SettingsPage from "./pages/Setting/settingPage";
 // Main App Component
 function App() {
+  const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
+  const isLoggedIn = Object.keys(reduxState).length > 0; // check nếu reduxState có data
+
   return (
     <>
       <Router>
         <Routes>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/add-job" element={<AddJobForm />} />
+          {/* Route mặc định */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
+          {/* Public route */}
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            }
+          />
+
+          {/* Private route với role */}
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute allowedRoles={["ADMIN", "USER"]}>
+                <DashboardPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/add-job"
+            element={
+              <PrivateRoute allowedRoles={["ADMIN", "USER"]}>
+                <AddJobForm />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <PrivateRoute allowedRoles={["ADMIN", "USER"]}>
+                <SettingsPage />
+              </PrivateRoute>
+            }
+          />
+
+          {/* 403 Forbidden */}
+          <Route path="/403" element={<ForbiddenPage />} />
+
+          {/* 404 Not Found */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Router>
     </>

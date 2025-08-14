@@ -32,7 +32,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-indigo-600 fixed top-0 text-white w-full shadow-lg z-800">
+    <header className="bg-indigo-600 fixed top-0 text-white w-full shadow-lg z-1000">
       {/* Main Header */}
       <div className="px-4 md:px-6 lg:px-8 py-3 md:py-4">
         <div className="flex justify-between items-center">
@@ -94,11 +94,11 @@ const Header: React.FC = () => {
               </div>
             ) : (
               <button
-              onClick={() => handleNavigation("/profile")}
-              className="font-medium text-sm lg:text-base hover:text-indigo-200 transition-colors duration-200 px-2 py-1 rounded"
-            >
-              Profile
-            </button>
+                onClick={() => handleNavigation("/profile")}
+                className="font-medium text-sm lg:text-base hover:text-indigo-200 transition-colors duration-200 px-2 py-1 rounded"
+              >
+                Profile
+              </button>
             )}
           </nav>
 
@@ -108,7 +108,11 @@ const Header: React.FC = () => {
             className="md:hidden p-2 rounded-lg hover:bg-indigo-700 transition-colors duration-200"
             aria-label="Toggle mobile menu"
           >
-            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {isMobileMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
           </button>
         </div>
       </div>
@@ -135,7 +139,7 @@ const Header: React.FC = () => {
             >
               ℹ️ About
             </button>
-            
+
             {firstName ? (
               <button
                 onClick={handleLogout}
@@ -145,11 +149,11 @@ const Header: React.FC = () => {
               </button>
             ) : (
               <button
-              onClick={() => handleNavigation("/profile")}
-              className="block w-full text-left font-medium text-white hover:text-indigo-200 hover:bg-indigo-600 transition-colors duration-200 px-3 py-2 rounded"
-            >
-              👤 Profile
-            </button>
+                onClick={() => handleNavigation("/profile")}
+                className="block w-full text-left font-medium text-white hover:text-indigo-200 hover:bg-indigo-600 transition-colors duration-200 px-3 py-2 rounded"
+              >
+                👤 Profile
+              </button>
             )}
           </nav>
 

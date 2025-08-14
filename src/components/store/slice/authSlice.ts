@@ -41,7 +41,7 @@ const authSlice = createSlice({
       state.role = null;
       state.firstName = null;
       state.isAuthenticated = false;
-      localStorage.removeItem("reduxState");
+      localStorage.clear(); // Clear local storage on logout
     },
   },
 });

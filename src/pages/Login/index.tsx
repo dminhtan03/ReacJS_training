@@ -13,7 +13,7 @@ import { Toast } from "@/components/ui";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "@/components/store/slice/authSlice";
 const LoginPage: React.FC = () => {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,10 +38,10 @@ const LoginPage: React.FC = () => {
     department?: string;
     accountType?: string;
   }>({});
-   const [toast, setToast] = useState<{
-      message: string;
-      type: "success" | "error";
-    } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   const navigate = useNavigate();
 
@@ -154,27 +154,28 @@ const LoginPage: React.FC = () => {
       }),
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      alert(`Sign-up successful! User ID: ${data.id}. Redirecting to login page...`);
-      navigate("/login");
-    } else {
-      const errorData = await response.json();
+      if (response.ok) {
+        const data = await response.json();
+        alert(
+          `Sign-up successful! User ID: ${data.id}. Redirecting to dashboard...`
+        );
+        navigate("/login"); // Chuyển hướng sau khi đăng ký thành công
+      } else {
+        const errorData = await response.json();
+        setErrors((prev) => ({
+          ...prev,
+          form: `Sign-up failed: ${errorData.message || "Please try again."}`,
+        }));
+      }
+    } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        form: `Sign-up failed: ${errorData.message || "Please try again."}`,
+        form: "An error occurred. Please try again later.",
       }));
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    setErrors((prev) => ({
-      ...prev,
-      form: "An error occurred. Please try again later.",
-    }));
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -203,27 +204,27 @@ const LoginPage: React.FC = () => {
       });
       
       setTimeout(() => {
-        navigate("/");
+        navigate("/dashboard");
       }, 1000)
     } else {
         setToast({
-        message: "Email or password are incorrect.",
-        type: "error",
-      });
+          message: "Email or password are incorrect.",
+          type: "error",
+        });
+        setErrors((prev) => ({
+          ...prev,
+          form: "Email hoặc mật khẩu không đúng.",
+        }));
+      }
+    } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        form: "Email hoặc mật khẩu không đúng.",
+        form: "Đã xảy ra lỗi. Vui lòng thử lại sau.",
       }));
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    setErrors((prev) => ({
-      ...prev,
-      form: "Đã xảy ra lỗi. Vui lòng thử lại sau.",
-    }));
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
