@@ -16,6 +16,7 @@ import PublicRoute from "./components/common/PublicRoute";
 import NotFoundPage from "./pages/ErrorPage/404";
 import ForbiddenPage from "./pages/ErrorPage/403";
 import SettingsPage from "./pages/Setting/settingPage";
+import GetAllJobs from "./pages/Dashboard/getAllJobs";
 // Main App Component
 function App() {
   const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
@@ -44,6 +45,15 @@ function App() {
             element={
               <PrivateRoute allowedRoles={["ADMIN", "USER"]}>
                 <DashboardPage />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/allJobs"
+            element={
+              <PrivateRoute allowedRoles={["USER"]}>
+                <GetAllJobs />
               </PrivateRoute>
             }
           />
