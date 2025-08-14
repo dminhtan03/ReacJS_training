@@ -80,7 +80,7 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
         setTimeout(() => {
           onUpdated(); // reload job list
           onClose();
-        }, 2000);
+        }, 1000);
       }
     } catch (error) {
       console.error("Update failed", error);
