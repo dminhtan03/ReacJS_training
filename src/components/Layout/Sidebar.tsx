@@ -17,15 +17,16 @@ const Sidebar: React.FC = () => {
   const getLinkClass = (path: string) => {
     const baseClass = "block p-2 mb-2 font-semibold rounded transition";
     const activeClass = "bg-violet-600 text-white";
-    const inactiveClass = "text-gray-700 hover:bg-violet-200 hover:text-violet-800";
-    
+    const inactiveClass =
+      "text-gray-700 hover:bg-violet-200 hover:text-violet-800";
+
     return `${baseClass} ${isActive(path) ? activeClass : inactiveClass}`;
   };
 
   return (
-    <aside 
+    <aside
       className={`
-        ${isCollapsed ? 'w-16' : 'w-[220px]'} 
+        ${isCollapsed ? "w-16" : "w-[220px]"} 
         bg-gray-100 p-4 transition-all duration-300
         hidden md:block
       `}
@@ -51,7 +52,7 @@ const Sidebar: React.FC = () => {
         >
           {isCollapsed ? "🏠" : "🏠 Dashboard"}
         </Link>
-        
+
         <Link
           to="/add-job"
           className={getLinkClass("/add-job")}
@@ -59,7 +60,7 @@ const Sidebar: React.FC = () => {
         >
           {isCollapsed ? "➕" : "➕ Add Job"}
         </Link>
-        
+
         <Link
           to="/settings"
           className={getLinkClass("/settings")}

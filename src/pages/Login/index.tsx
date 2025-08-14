@@ -13,7 +13,7 @@ import { Toast } from "@/components/ui";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "@/components/store/slice/authSlice";
 const LoginPage: React.FC = () => {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,10 +38,10 @@ const LoginPage: React.FC = () => {
     department?: string;
     accountType?: string;
   }>({});
-   const [toast, setToast] = useState<{
-      message: string;
-      type: "success" | "error";
-    } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   const navigate = useNavigate();
 
@@ -133,97 +133,105 @@ const LoginPage: React.FC = () => {
   };
 
   const handleSignUp = async (e) => {
-  e.preventDefault();
-  if (!validateAllFields()) return;
+    e.preventDefault();
+    if (!validateAllFields()) return;
 
-  setLoading(true);
-  try {
-    const response = await fetch("https://689c2efc58a27b18087d282f.mockapi.io/api/v1/users/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        firstName,
-        lastName,
-        email,
-        password,
-        phoneNumber,
-        department,
-        accountType,
-        gender,
-        address,
-      }),
-    });
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "https://689c2efc58a27b18087d282f.mockapi.io/api/v1/users/signup",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firstName,
+            lastName,
+            email,
+            password,
+            phoneNumber,
+            department,
+            accountType,
+            gender,
+            address,
+          }),
+        }
+      );
 
-    if (response.ok) {
-      const data = await response.json();
-      alert(`Sign-up successful! User ID: ${data.id}. Redirecting to dashboard...`);
-      navigate("/"); // Chuyển hướng sau khi đăng ký thành công
-    } else {
-      const errorData = await response.json();
+      if (response.ok) {
+        const data = await response.json();
+        alert(
+          `Sign-up successful! User ID: ${data.id}. Redirecting to dashboard...`
+        );
+        navigate("/login"); // Chuyển hướng sau khi đăng ký thành công
+      } else {
+        const errorData = await response.json();
+        setErrors((prev) => ({
+          ...prev,
+          form: `Sign-up failed: ${errorData.message || "Please try again."}`,
+        }));
+      }
+    } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        form: `Sign-up failed: ${errorData.message || "Please try again."}`,
+        form: "An error occurred. Please try again later.",
       }));
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    setErrors((prev) => ({
-      ...prev,
-      form: "An error occurred. Please try again later.",
-    }));
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-  setLoading(true);
-  try {
-    const response = await fetch("https://689c2efc58a27b18087d282f.mockapi.io/api/v1/users/signup");
-    
-    const users = await response.json();
-    
-    const user = users.find((u) => u.email === email && u.password === password);
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "https://689c2efc58a27b18087d282f.mockapi.io/api/v1/users/signup"
+      );
 
-    if (user) {
+      const users = await response.json();
+
+      const user = users.find(
+        (u) => u.email === email && u.password === password
+      );
+
+      if (user) {
         // Set in redux
-       const userData = {
-        id: user.id,
-        email: user.email,
-        role: user.accountType,
-        firstName: user.firstName,
+        const userData = {
+          id: user.id,
+          email: user.email,
+          role: user.accountType,
+          firstName: user.firstName,
         };
 
         dispatch(loginSuccess(userData));
         setToast({
-        message: `Sign-in successful! Welcome, ${user.firstName}! Redirecting to dashboard...`,
-        type: "success",
-      });
-      
-      setTimeout(() => {
-        navigate("/");
-      }, 2000)
-    } else {
+          message: `Sign-in successful! Welcome, ${user.firstName}! Redirecting to dashboard...`,
+          type: "success",
+        });
+
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 2000);
+      } else {
         setToast({
-        message: "Email or password are incorrect.",
-        type: "error",
-      });
+          message: "Email or password are incorrect.",
+          type: "error",
+        });
+        setErrors((prev) => ({
+          ...prev,
+          form: "Email hoặc mật khẩu không đúng.",
+        }));
+      }
+    } catch (error) {
       setErrors((prev) => ({
         ...prev,
-        form: "Email hoặc mật khẩu không đúng.",
+        form: "Đã xảy ra lỗi. Vui lòng thử lại sau.",
       }));
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    setErrors((prev) => ({
-      ...prev,
-      form: "Đã xảy ra lỗi. Vui lòng thử lại sau.",
-    }));
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
@@ -231,11 +239,9 @@ const LoginPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full mb-4">
-              <Briefcase className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
-            </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-             Job Tracker
-          </h1>
+            <Briefcase className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Job Tracker</h1>
           <p className="text-gray-600">Manage your job efficiently</p>
         </div>
 
@@ -342,7 +348,7 @@ const LoginPage: React.FC = () => {
                     // disabled={loading}
                     className="w-full bg-gray-900 cursor-pointer text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all transform hover:scale-[0.99] active:scale-[0.97]"
                   >
-                    {loading ? "Signing In..." : "Sign In"} 
+                    {loading ? "Signing In..." : "Sign In"}
                   </button>
                 </div>
               </form>
@@ -591,14 +597,14 @@ const LoginPage: React.FC = () => {
         </div>
       </div>
       {/* Toast notification */}
-                {toast && (
-                  <Toast
-                    message={toast.message}
-                    type={toast.type}
-                    onClose={() => setToast(null)}
-                    className="max-w-[90%] sm:max-w-sm"
-                  />
-                )}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+          className="max-w-[90%] sm:max-w-sm"
+        />
+      )}
     </div>
   );
 };

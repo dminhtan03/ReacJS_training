@@ -18,6 +18,7 @@ const Header: React.FC = () => {
   const handleLogout = () => {
     dispatch(logout());
     setIsDropdownOpen(false);
+    localStorage.clear(); // Xóa local storage khi đăng xuất
     navigate("/login");
   };
 
@@ -58,7 +59,6 @@ const Header: React.FC = () => {
             >
               About
             </button>
-            
 
             {/* ⚡ Dropdown user */}
             {firstName ? (
@@ -93,11 +93,11 @@ const Header: React.FC = () => {
               </div>
             ) : (
               <button
-              onClick={() => handleNavigation("/profile")}
-              className="font-medium text-sm lg:text-base hover:text-indigo-200 transition-colors duration-200 px-2 py-1 rounded"
-            >
-              Profile
-            </button>
+                onClick={() => handleNavigation("/profile")}
+                className="font-medium text-sm lg:text-base hover:text-indigo-200 transition-colors duration-200 px-2 py-1 rounded"
+              >
+                Profile
+              </button>
             )}
           </nav>
 
@@ -107,7 +107,11 @@ const Header: React.FC = () => {
             className="md:hidden p-2 rounded-lg hover:bg-indigo-700 transition-colors duration-200"
             aria-label="Toggle mobile menu"
           >
-            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {isMobileMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
           </button>
         </div>
       </div>
@@ -134,7 +138,7 @@ const Header: React.FC = () => {
             >
               ℹ️ About
             </button>
-            
+
             {firstName ? (
               <button
                 onClick={handleLogout}
@@ -144,11 +148,11 @@ const Header: React.FC = () => {
               </button>
             ) : (
               <button
-              onClick={() => handleNavigation("/profile")}
-              className="block w-full text-left font-medium text-white hover:text-indigo-200 hover:bg-indigo-600 transition-colors duration-200 px-3 py-2 rounded"
-            >
-              👤 Profile
-            </button>
+                onClick={() => handleNavigation("/profile")}
+                className="block w-full text-left font-medium text-white hover:text-indigo-200 hover:bg-indigo-600 transition-colors duration-200 px-3 py-2 rounded"
+              >
+                👤 Profile
+              </button>
             )}
           </nav>
 
