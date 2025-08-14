@@ -5,9 +5,9 @@ import JobCard from "@/components/ui/JobCard";
 import Sidebar from "../../components/Layout/Sidebar";
 import ConfirmModal from "../../components/Layout/ConfirmModal";
 import { Check, X } from "lucide-react";
+import * as jobService from "../../service/jobService";
 import EditJobModal from "../../components/Layout/EditJobModal";
-
-import * as jobService from "../../service/jobService"; // Import API service
+import ScrollToTopButton from "@/components/Layout/ScrollToTop";
 
 interface JobFormData {
   id: string;
@@ -16,25 +16,38 @@ interface JobFormData {
   status: string;
   notes: string;
   dateAdded: string;
+  userId: string;
 }
 
 const DashboardPage: React.FC = () => {
   const [jobs, setJobs] = useState<JobFormData[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [sortByDate, setSortByDate] = useState("desc");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editJobId, setEditJobId] = useState<string | null>(null);
+  const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
+  const userId: string | undefined = reduxState?.auth?.id;
+  const userRole: string | undefined = reduxState?.auth?.role;
+  const statusOptions = [
+    { value: "Pending", label: "✨ Pending" },
+    { value: "Applied", label: "📝 Applied" },
+    { value: "Interview", label: "🎯 Interview" },
+    { value: "Offer", label: "✨ Offer" },
+    { value: "Rejected", label: "❌ Rejected" },
+  ];
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
   } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 9; // số job mỗi trang
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // New state for sidebar toggle
+  const itemsPerPage = 9;
   const navigate = useNavigate();
 
-  // Toast component giữ nguyên
+  // Toast component
   const Toast: React.FC<{
     message: string;
     type: "success" | "error";
@@ -47,7 +60,7 @@ const DashboardPage: React.FC = () => {
 
     return (
       <div
-        className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-sm ${
+        className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-[90%] sm:max-w-sm ${
           type === "success"
             ? "bg-green-500 text-white"
             : "bg-red-500 text-white"
@@ -71,7 +84,7 @@ const DashboardPage: React.FC = () => {
     );
   };
 
-  // Load jobs từ API khi component mount
+  // Load jobs from API
   useEffect(() => {
     jobService
       .getJobs()
@@ -81,7 +94,7 @@ const DashboardPage: React.FC = () => {
       );
   }, []);
 
-  // Xóa job qua API
+  // Delete job
   const handleDelete = (id: string) => {
     jobService
       .deleteJob(id)
@@ -99,16 +112,13 @@ const DashboardPage: React.FC = () => {
     try {
       // Gọi API để lấy job theo ID
       const job = await jobService.getJobById(id);
-      console.log("Job cần chỉnh sửa:", job);
 
       setEditJobId(id);
       setEditModalOpen(true);
-    } catch (error) {
-      console.error("Không thể lấy job:", error);
-    }
+    } catch (error) {}
   };
 
-  // Lọc theo search và status
+  // Filter jobs
   const filteredJobs = jobs.filter((job) => {
     const matchesSearch =
       job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -117,16 +127,29 @@ const DashboardPage: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // Tính tổng trang
-  const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
+  // Sort by date
+  const sortedJobs = [...filteredJobs].sort((a, b) => {
+    if (sortByDate === "asc") {
+      return new Date(a.dateAdded).getTime() - new Date(b.dateAdded).getTime();
+    } else if (sortByDate === "desc") {
+      return new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime();
+    }
+    return 0;
+  });
 
-  // Jobs trang hiện tại
-  const currentJobs = filteredJobs.slice(
+  const visibleJobs =
+    userRole === "ADMIN"
+      ? sortedJobs
+      : sortedJobs.filter((job) => String(job.userId) === String(userId));
+
+  // Pagination
+  const totalPages = Math.ceil(visibleJobs.length / itemsPerPage);
+  const currentJobs = visibleJobs.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  // Hàm chuyển trang
+  console.log("Sorted Jobs:", visibleJobs);
   const goToPage = (page: number) => {
     if (page < 1) page = 1;
     else if (page > totalPages) page = totalPages;
@@ -134,51 +157,82 @@ const DashboardPage: React.FC = () => {
   };
 
   return (
-    <>
-      <Header />
-
-      <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 text-gray-900">
-        <Sidebar />
-
-        <main className="flex-grow p-8 bg-white">
-          <h1 className="text-2xl font-bold mb-6">My Jobs</h1>
-
+    <div className="w-full">
+      <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <div className="flex min-h-[calc(100vh-64px)] pt-16 bg-gray-50 text-gray-900">
+        {/* Sidebar: Hidden on mobile, visible on tablet/desktop */}
+        <div
+          className={`fixed inset-y-0 left-0 z-40 transform ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out`}
+        >
+          <Sidebar />
+        </div>
+        {/* Overlay for mobile sidebar */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+        <main className="flex-grow p-4 sm:p-6 md:p-8 bg-white">
+          <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
+            My Jobs
+          </h1>
           {/* Search & Filter */}
-          <div className="flex gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <input
               type="text"
               placeholder="Search jobs..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-base"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setCurrentPage(1); // reset trang khi search
+                setCurrentPage(1);
               }}
             />
             <select
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-base"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600"
               value={filterStatus}
               onChange={(e) => {
                 setFilterStatus(e.target.value);
-                setCurrentPage(1); // reset trang khi filter
+                setCurrentPage(1);
               }}
             >
               <option value="">All Status</option>
-              <option value="Applied">Applied</option>
+              <option className="custom_option_mobile" value="Pending">
+                Pending
+              </option>
+
+              <option className="custom_option_mobile" value="Applied">
+                Applied
+              </option>
               <option value="Interview">Interview</option>
               <option value="Offer">Offer</option>
               <option value="Rejected">Rejected</option>
             </select>
+
+            <select
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600"
+              value={sortByDate}
+              onChange={(e) => {
+                setSortByDate(e.target.value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="">Applied date</option>
+              <option value="asc">Increase</option>
+              <option value="desc">Decrease</option>
+            </select>
             <Link
               to="/add-job"
-              className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2 rounded-lg font-semibold transition"
+              className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base text-center transition"
             >
               Add Job
             </Link>
           </div>
-
           {/* Job Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {currentJobs.length > 0 ? (
               currentJobs.map((job) => (
                 <JobCard
@@ -196,66 +250,60 @@ const DashboardPage: React.FC = () => {
                 />
               ))
             ) : (
-              <p className="text-gray-500">No jobs found.</p>
+              <p className="text-gray-500 col-span-full text-center">
+                No jobs found.
+              </p>
             )}
           </div>
-
-          {/* Pagination controls */}
+          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center mt-6 space-x-2">
               <button
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-3 py-1 rounded border cursor-pointer border-gray-300 disabled:opacity-50"
+                className={`px-3 py-1 rounded border border-gray-300 disabled:opacity-50 text-sm sm:text-base ${
+                  currentPage > 1 ? "cursor-pointer" : ""
+                }`}
               >
                 Prev
               </button>
-
-              {/* Hiển thị các số trang (giới hạn hiển thị nếu nhiều trang) */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => {
-                  // Hiển thị đầy đủ hoặc rút gọn (bạn có thể tùy biến)
-                  if (
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(
+                  (page) =>
                     page === 1 ||
                     page === totalPages ||
                     (page >= currentPage - 1 && page <= currentPage + 1)
-                  ) {
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => goToPage(page)}
-                        className={`px-3 py-1 rounded border ${
-                          page === currentPage
-                            ? "bg-blue-600 cursor-pointer text-white border-blue-600"
-                            : "border-gray-300"
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  }
-                  // Hiển thị dấu "..." nếu có trang bị ẩn
-                  if (page === currentPage - 2 || page === currentPage + 2) {
-                    return <span key={page}>...</span>;
-                  }
-                  return null;
-                }
-              )}
-
+                )
+                .map((page, index, filtered) => (
+                  <React.Fragment key={page}>
+                    {index > 0 &&
+                      filtered[index - 1] !== page - 1 &&
+                      page !== 1 && <span className="px-2">...</span>}
+                    <button
+                      onClick={() => goToPage(page)}
+                      className={`px-3 py-1 rounded cursor-pointer border text-sm sm:text-base ${
+                        page === currentPage
+                          ? "bg-violet-600 text-white border-violet-600"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  </React.Fragment>
+                ))}
               <button
                 onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 rounded border cursor-pointer border-gray-300 disabled:opacity-50"
+                className="px-3 py-1 cursor-pointer rounded border border-gray-300 disabled:opacity-50 text-sm sm:text-base"
               >
                 Next
               </button>
             </div>
           )}
-
-          {/* Confirm modal */}
+          {/* Confirm Modal */}
           <ConfirmModal
             isOpen={isModalOpen}
-            message="Do you wanna delete this job?"
+            message="Do you want to delete this job?"
             onCancel={() => setIsModalOpen(false)}
             onConfirm={() => {
               if (selectedJobId !== null) {
@@ -281,8 +329,9 @@ const DashboardPage: React.FC = () => {
             />
           )}
         </main>
+        <ScrollToTopButton />
       </div>
-    </>
+    </div>
   );
 };
 

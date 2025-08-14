@@ -1,35 +1,50 @@
 export interface JobFormData {
-    id: string;
-    company : string;
-    position: string;
-    status: JobStatus;
-    notes: string;
-    dateAdded: string;
+  id: string;
+  company: string | undefined;
+  position: string;
+  status: JobStatus;
+  notes: string;
+  dateAdded: string;
+  employeeName: string;
+  email: string;
+  phoneNumber: string;
+  submittedBy: string;
+  approvedBy: string;
+  userId: string;
 }
-export type JobStatus = "Applied" | "Interview" | "Offer" | "Rejected";
+export type JobStatus =
+  | "Applied"
+  | "Interview"
+  | "Offer"
+  | "Rejected"
+  | "Pending"
+  | "Approved";
 
 export interface ValidationErrors {
-    company?: string;
-    position?: string;
-    status?: string;
-    notes?: string;
-
+  company?: string;
+  position?: string;
+  status?: string;
+  notes?: string;
+  email?: string;
+  phoneNumber?: string;
+  employeeName?: string;
 }
 
 export interface FormFieldProps {
-    label: string;
-    error?: string;
-    required?: boolean,
-    children: React.ReactNode;
+  label: string;
+  error?: string;
+  required?: boolean;
+  children: React.ReactNode;
 }
 
 export interface InputProps extends React.InsHTMLAttributes<HTMLInputElement> {
-    error?: boolean;
+  error?: boolean;
 }
 
-export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-    error?: boolean;
-    options: {value: string, label: string}[];
+export interface SelectProps
+  extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  error?: boolean;
+  options: { value: string; label: string }[];
 }
 
 export interface TextareaProps
@@ -38,7 +53,7 @@ export interface TextareaProps
 }
 
 export interface ToastProps {
-    message: string;
-    type: "success" | "error";
-    onClose: () => void;
+  message: string;
+  type: "success" | "error";
+  onClose: () => void;
 }

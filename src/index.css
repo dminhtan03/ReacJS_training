@@ -13,3 +13,17 @@
     padding-right: 2rem;
   }
 }
+
+@media (max-width: 640px) {
+  select {
+    padding: 8px;
+    font-size: 14px;
+  }
+  .custom_desktop {
+    margin: 16px;
+  }
+  .custom_option_mobile {
+    width: 398px;
+  }
+}
+

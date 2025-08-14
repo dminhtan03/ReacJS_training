@@ -1,41 +1,63 @@
 import React, { useState, useCallback } from "react";
-import { Check, X, Briefcase } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import { Header } from "@/components/Layout";
 import Sidebar from "../../components/Layout/Sidebar";
 import { JobFormData, JobStatus, ValidationErrors } from "@/types/job.types";
 import { JobValidator } from "@/utils/jobValidator";
 import { FormField, Input, Select, Textarea, Toast } from "@/components/ui";
-
-import * as jobService from "../../service/jobService"; // Import API service
+import * as jobService from "../../service/jobService";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "@/components/store/store";
 
 // Main Add Job Form Component
 const AddJobForm: React.FC = () => {
+  // Get user info from Redux store
+  const { firstName, isAuthenticated, role } = useSelector(
+    (state: RootState) => state.auth
+  );
+
+  const isAdmin = role === "admin";
+  const isUser = role === "user";
+  const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
+  const userId: string | undefined = reduxState?.auth?.id;
+
   const [formData, setFormData] = useState<Partial<JobFormData>>({
     company: "",
     position: "",
-    status: "Applied",
+    status: isAdmin ? "Applied" : "Pending", // Default status based on role
     notes: "",
+    employeeName: "",
+    phoneNumber: "",
+    email: "",
+    userId: "",
   });
-
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
   } | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const statusOptions = [
+  // Status options based on user role
+  const adminStatusOptions = [
     { value: "Applied", label: "📝 Applied" },
     { value: "Interview", label: "🎯 Interview" },
     { value: "Offer", label: "✨ Offer" },
     { value: "Rejected", label: "❌ Rejected" },
+    { value: "Pending", label: "⏳ Pending Approval" },
+    { value: "Approved", label: "✅ Approved" },
+  ];
+
+  const userStatusOptions = [
+    { value: "Pending", label: "⏳ Pending Approval" },
   ];
 
   const handleInputChange = useCallback(
     (field: keyof JobFormData, value: string) => {
       setFormData((prev) => ({ ...prev, [field]: value }));
-
-      // Clear error when user starts typing
       if (errors[field]) {
         setErrors((prev) => ({ ...prev, [field]: undefined }));
       }
@@ -47,47 +69,51 @@ const AddJobForm: React.FC = () => {
     setFormData({
       company: "",
       position: "",
-      status: "Applied",
+      status: isAdmin ? "Applied" : "Pending", // Reset to default based on role
       notes: "",
+      employeeName: "",
+      phoneNumber: "",
+      email: "",
     });
     setErrors({});
   };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-
     try {
-      // Validate form
       const validationErrors = JobValidator.validateForm(formData);
       const hasErrors = Object.values(validationErrors).some((error) => error);
-
       if (hasErrors) {
         setErrors(validationErrors);
         setToast({ message: "Please fix the errors below", type: "error" });
         setIsSubmitting(false);
         return;
       }
-
-      // Prepare job data
       const jobData: JobFormData = {
-        // id: JobStorageService.generateId(), // hoặc có thể để backend generate id
         company: formData.company!.trim(),
         position: formData.position!.trim(),
-        status: formData.status as JobStatus,
+        status: isUser ? "Pending" : (formData.status as JobStatus), // Force PENDING for users
         notes: formData.notes?.trim() || "",
+        employeeName: formData.employeeName?.trim() || "",
+        phoneNumber: formData.phoneNumber?.trim() || "",
+        email: formData.email?.trim() || "",
         dateAdded: new Date().toISOString(),
+        approvedBy:
+          isAdmin && formData.status === "Approved" ? userId : undefined, // Track who approved
+        userId: userId || "", // Track the user ID
       };
-
-      // Gọi API để tạo job
       await jobService.createJob(jobData);
-
       setToast({
-        message: "Job application added successfully! 🎉",
+        message: isUser
+          ? "Job application submitted for approval! 🎉"
+          : "Job application added successfully! 🎉",
         type: "success",
       });
       resetForm();
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
     } catch (error) {
-      console.error("Error submitting form:", error);
       setToast({
         message: "Failed to save job. Please try again.",
         type: "error",
@@ -105,92 +131,181 @@ const AddJobForm: React.FC = () => {
 
   return (
     <>
-      <Header />
-      <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 text-gray-900">
-        {/* Sidebar */}
-        <Sidebar />
-        <div className="flex-grow p-6 bg-white mx-auto">
+      <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <div className="flex min-h-[calc(100vh-64px)] pt-15 bg-gray-50 text-gray-900">
+        {/* Sidebar: Hidden on mobile, visible on tablet/desktop */}
+        <div
+          className={`fixed inset-y-0 left-0 z-40 transform ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out w-64 md:w-56 lg:w-64`}
+        >
+          <Sidebar />
+        </div>
+        {/* Overlay for mobile sidebar */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+        <div className="flex-grow p-4 sm:p-6 md:p-8 mx-auto max-w-4xl">
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-              <Briefcase className="w-8 h-8 text-blue-600" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Add New Job
-            </h1>
-            <p className="text-gray-600">
-              Track your job applications and manage your career journey
-            </p>
-          </div>
 
           {/* Form */}
-          <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+          <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100">
             <div className="space-y-6" onKeyDown={handleKeyPress}>
-              <FormField label="Company Name" error={errors.company} required>
-                <Input
-                  type="text"
-                  placeholder="e.g. Google, Microsoft, Apple..."
-                  value={formData.company || ""}
-                  onChange={(e) => handleInputChange("company", e.target.value)}
-                  error={!!errors.company}
-                  disabled={isSubmitting}
-                />
-              </FormField>
+              {/* Company and Position Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField label="Company Name" error={errors.company} required>
+                  <Input
+                    type="text"
+                    placeholder="e.g. Google, Microsoft, Apple..."
+                    value={formData.company || ""}
+                    onChange={(e) =>
+                      handleInputChange("company", e.target.value)
+                    }
+                    error={!!errors.company}
+                    disabled={isSubmitting}
+                    className="text-sm sm:text-base"
+                  />
+                </FormField>
 
-              <FormField label="Job Position" error={errors.position} required>
-                <Input
-                  type="text"
-                  placeholder="e.g. Frontend Developer, Software Engineer..."
-                  value={formData.position || ""}
-                  onChange={(e) =>
-                    handleInputChange("position", e.target.value)
-                  }
-                  error={!!errors.position}
-                  disabled={isSubmitting}
-                />
-              </FormField>
+                <FormField
+                  label="Job Position"
+                  error={errors.position}
+                  required
+                >
+                  <Input
+                    type="text"
+                    placeholder="e.g. Frontend Developer, Software Engineer..."
+                    value={formData.position || ""}
+                    onChange={(e) =>
+                      handleInputChange("position", e.target.value)
+                    }
+                    error={!!errors.position}
+                    disabled={isSubmitting}
+                    className="text-sm sm:text-base"
+                  />
+                </FormField>
+              </div>
 
-              <FormField label="Application Status" error={errors.status}>
-                <Select
-                  options={statusOptions}
-                  value={formData.status || "Applied"}
-                  onChange={(e) => handleInputChange("status", e.target.value)}
-                  error={!!errors.status}
-                  disabled={isSubmitting}
-                />
-              </FormField>
+              {/* Employee Information Section */}
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Contact Information
+                </h3>
 
-              <FormField label="Notes" error={errors.notes}>
-                <Textarea
-                  rows={4}
-                  placeholder="e.g. Interview scheduled for next Monday, Applied through LinkedIn, Salary range 30-40M VND..."
-                  value={formData.notes || ""}
-                  onChange={(e) => handleInputChange("notes", e.target.value)}
-                  error={!!errors.notes}
-                  disabled={isSubmitting}
-                />
-                <div className="flex justify-between items-center mt-2">
-                  <p className="text-xs text-gray-500">
-                    💡 Tip: Press Ctrl + Enter to submit quickly
-                  </p>
-                  <div
-                    className={`text-xs ${
-                      (formData.notes || "").length > 900
-                        ? "text-red-500"
-                        : "text-gray-500"
-                    }`}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    label="Employee Name"
+                    error={errors.employeeName}
+                    required
                   >
-                    {(formData.notes || "").length}/1000 characters
-                  </div>
+                    <Input
+                      type="text"
+                      placeholder="e.g. John Doe, Jane Smith..."
+                      value={formData.employeeName || ""}
+                      onChange={(e) =>
+                        handleInputChange("employeeName", e.target.value)
+                      }
+                      error={!!errors.employeeName}
+                      disabled={isSubmitting}
+                      className="text-sm sm:text-base"
+                    />
+                  </FormField>
+
+                  <FormField
+                    label="Phone Number"
+                    error={errors.phoneNumber}
+                    required
+                  >
+                    <Input
+                      type="tel"
+                      placeholder="e.g. +84 123 456 789"
+                      value={formData.phoneNumber || ""}
+                      onChange={(e) =>
+                        handleInputChange("phoneNumber", e.target.value)
+                      }
+                      error={!!errors.phoneNumber}
+                      disabled={isSubmitting}
+                      className="text-sm sm:text-base"
+                    />
+                  </FormField>
                 </div>
-              </FormField>
-              <div className="flex">
+
+                <FormField
+                  label="Email Address"
+                  error={errors.email}
+                  className="mt-6"
+                  required
+                >
+                  <Input
+                    type="email"
+                    placeholder="e.g. john.doe@company.com"
+                    value={formData.email || ""}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    error={!!errors.email}
+                    disabled={isSubmitting}
+                    className="text-sm sm:text-base"
+                  />
+                </FormField>
+              </div>
+
+              {/* Application Status - Only visible to Admin */}
+              {isAdmin && (
+                <div className="border-t pt-6">
+                  <FormField label="Application Status" error={errors.status}>
+                    <Select
+                      options={adminStatusOptions}
+                      value={formData.status || "Applied"}
+                      onChange={(e) =>
+                        handleInputChange("status", e.target.value)
+                      }
+                      error={!!errors.status}
+                      disabled={isSubmitting}
+                      className="text-sm sm:text-base"
+                    />
+                  </FormField>
+                </div>
+              )}
+
+              {/* Notes Section */}
+              <div className="border-t pt-6">
+                <FormField label="Notes" error={errors.notes}>
+                  <Textarea
+                    rows={4}
+                    placeholder="e.g. Interview scheduled for next Monday, Applied through LinkedIn, Salary range 30-40M VND..."
+                    value={formData.notes || ""}
+                    onChange={(e) => handleInputChange("notes", e.target.value)}
+                    error={!!errors.notes}
+                    disabled={isSubmitting}
+                    className="text-sm sm:text-base"
+                  />
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-2 gap-2">
+                    <p className="text-xs text-gray-500">
+                      💡 Tip: Press Ctrl + Enter to submit quickly
+                    </p>
+                    <div
+                      className={`text-xs ${
+                        (formData.notes || "").length > 900
+                          ? "text-red-500"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {(formData.notes || "").length}/1000 characters
+                    </div>
+                  </div>
+                </FormField>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 pt-6">
                 {/* Submit Button */}
                 <button
                   type="button"
                   onClick={handleSubmit}
                   disabled={isSubmitting}
-                  className={`w-full py-4 px-6 rounded-lg font-semibold text-white transition-all duration-200 ${
+                  className={`flex-1 py-3 sm:py-4 cursor-pointer px-6 rounded-lg font-semibold text-white text-sm sm:text-base transition-all duration-200 ${
                     isSubmitting
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transform hover:scale-[1.02] active:scale-[0.98]"
@@ -202,9 +317,8 @@ const AddJobForm: React.FC = () => {
                       Saving Job Application...
                     </div>
                   ) : (
-                    <div className="flex items-center cursor-pointer justify-center">
-                      <Briefcase className="w-5 h-5 mr-2" />
-                      Add Job
+                    <div className="flex items-center justify-center">
+                      {isUser ? "Submit for Approval" : "Submit Job"}
                     </div>
                   )}
                 </button>
@@ -214,9 +328,9 @@ const AddJobForm: React.FC = () => {
                   type="button"
                   onClick={resetForm}
                   disabled={isSubmitting}
-                  className={`w-full py-2 px-4 cursor-pointer text-gray-600 hover:text-gray-800 transition-colors duration-200 text-sm ${
-                    !isSubmitting ? "cursor-pointer" : ""
-                  } `}
+                  className={`flex-1 py-3 px-4 rounded-lg text-gray-600 hover:text-gray-800 bg-gray-200 text-sm sm:text-base transition-colors duration-200 ${
+                    isSubmitting ? "cursor-not-allowed" : "cursor-pointer"
+                  }`}
                 >
                   Clear Form
                 </button>
@@ -224,26 +338,13 @@ const AddJobForm: React.FC = () => {
             </div>
           </div>
 
-          {/* Demo: Show saved jobs count */}
-          {/* {JobStorageService.getAllJobs().length > 0 && (
-            <div className="mt-6 text-center">
-              <div className="inline-flex items-center px-4 py-2 bg-green-50 border border-green-200 rounded-full">
-                <Check className="w-4 h-4 text-green-600 mr-2" />
-                <span className="text-green-700 text-sm font-medium">
-                  {JobStorageService.getAllJobs().length} job
-                  {JobStorageService.getAllJobs().length > 1 ? "s" : ""} saved
-                  successfully
-                </span>
-              </div>
-            </div>
-          )} */}
-
           {/* Toast notification */}
           {toast && (
             <Toast
               message={toast.message}
               type={toast.type}
               onClose={() => setToast(null)}
+              className="max-w-[90%] sm:max-w-sm z-1001"
             />
           )}
         </div>
