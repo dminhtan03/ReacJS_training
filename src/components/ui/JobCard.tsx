@@ -56,7 +56,6 @@ const JobCard: React.FC<JobCardProps> = ({
           {notes ? notes : "No notes available"}
         </p>
       </div>
-
       {/* Nếu không phải USER mới hiển thị nút */}
       {(role === "ADMIN" || userId === userIdStorage) && (
         <div className="flex justify-end gap-2 mt-auto">
