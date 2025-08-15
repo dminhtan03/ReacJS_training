@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Header from "../../components/Layout/Header";
-import Sidebar from "../../components/Layout/Sidebar";
 import JobCard from "@/components/ui/JobCard";
-import ScrollToTopButton from "@/components/Layout/ScrollToTop";
-import * as jobService from "../../service/jobService";
+import Sidebar from "../../components/Layout/Sidebar";
+import ConfirmModal from "../../components/Layout/ConfirmModal";
 import { Check, X } from "lucide-react";
+import * as jobService from "../../service/jobService";
+import EditJobModal from "../../components/Layout/EditJobModal";
+import ScrollToTopButton from "@/components/Layout/ScrollToTop";
 
 interface JobFormData {
   id: string;
@@ -13,25 +16,35 @@ interface JobFormData {
   status: string;
   notes: string;
   dateAdded: string;
-  role: string;
   userId: string;
+  role: string;
 }
 
-const GetAllJobs: React.FC = () => {
+const MyJobsPage: React.FC = () => {
   const [jobs, setJobs] = useState<JobFormData[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [sortByDate, setSortByDate] = useState("desc");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const itemsPerPage = 9;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editJobId, setEditJobId] = useState<string | null>(null);
+  const [editUserId, setEditUserId] = useState<string | null>(null);
   const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
-  const userRole: string | undefined = reduxState?.auth?.role;
   const userId: string | undefined = reduxState?.auth?.id;
+  const userRole: string | undefined = reduxState?.auth?.role;
+  const statusOptions = [
+    { value: "Pending", label: "✨ Pending" },
+    { value: "Approved", label: "📝 Approved" },
+    { value: "Rejected", label: "❌ Rejected" },
+  ];
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
   } | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const itemsPerPage = 9;
 
   // Toast component
   const Toast: React.FC<{
@@ -70,6 +83,7 @@ const GetAllJobs: React.FC = () => {
     );
   };
 
+  // Load jobs from API
   useEffect(() => {
     jobService
       .getJobs()
@@ -79,6 +93,32 @@ const GetAllJobs: React.FC = () => {
       );
   }, []);
 
+  // Delete job
+  const handleDelete = (id: string) => {
+    jobService
+      .deleteJob(id)
+      .then(() => {
+        setJobs((prev) => prev.filter((job) => job.id !== id));
+        setToast({ message: "Job deleted successfully!", type: "success" });
+      })
+      .catch(() => {
+        setToast({ message: "Failed to delete job!", type: "error" });
+      });
+  };
+
+  // Edit job
+  const handleEdit = async (id: string, userId: string) => {
+    try {
+      const job = await jobService.getJobById(id);
+      setEditJobId(id);
+      setEditUserId(userId);
+      console.log("Edit job ID:", userId);
+
+      setEditModalOpen(true);
+    } catch (error) {}
+  };
+
+  // Filter jobs
   const filteredJobs = jobs.filter((job) => {
     const matchesSearch =
       job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -96,7 +136,10 @@ const GetAllJobs: React.FC = () => {
     }
     return 0;
   });
-  const visibleJobs = sortedJobs;
+
+  const visibleJobs = sortedJobs.filter(
+    (job) => String(job.userId) === String(userId)
+  );
 
   // Pagination
   const totalPages = Math.ceil(visibleJobs.length / itemsPerPage);
@@ -112,9 +155,9 @@ const GetAllJobs: React.FC = () => {
   };
 
   return (
-    <div className="w-full" style={{ height: "100vh" }}>
+    <div className="w-full dark:bg-gray-900" style={{ height: "100vh" }}>
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <div className="flex min-h-[calc(100vh-64px)] pt-16 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 dark:border-gray-700">
+      <div className="flex min-h-[calc(100vh-64px)] pt-16 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -129,15 +172,15 @@ const GetAllJobs: React.FC = () => {
           />
         )}
         <main className="flex-grow p-4 sm:p-6 md:p-8 bg-white dark:bg-gray-900">
-          <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-gray-100">
-            All Jobs
+          <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 dark:text-white">
+            My Jobs
           </h1>
           {/* Search & Filter */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <input
               type="text"
               placeholder="Search jobs..."
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -145,7 +188,7 @@ const GetAllJobs: React.FC = () => {
               }}
             />
             <select
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               value={filterStatus}
               onChange={(e) => {
                 setFilterStatus(e.target.value);
@@ -162,7 +205,7 @@ const GetAllJobs: React.FC = () => {
               <option value="Rejected">Rejected</option>
             </select>
             <select
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-500"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               value={sortByDate}
               onChange={(e) => {
                 setSortByDate(e.target.value);
@@ -173,6 +216,12 @@ const GetAllJobs: React.FC = () => {
               <option value="asc">Increase</option>
               <option value="desc">Decrease</option>
             </select>
+            <Link
+              to="/add-job"
+              className="bg-violet-600 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600 text-white px-4 py-2 rounded-lg font-semibold text-sm sm:text-base text-center transition"
+            >
+              Add Job
+            </Link>
           </div>
           {/* Job Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -186,6 +235,12 @@ const GetAllJobs: React.FC = () => {
                   date={new Date(job.dateAdded).toLocaleDateString()}
                   notes={job.notes}
                   role={userRole}
+                  userId={job.userId}
+                  onEdit={() => handleEdit(job.id, job.userId)}
+                  onDelete={() => {
+                    setSelectedJobId(job.id);
+                    setIsModalOpen(true);
+                  }}
                 />
               ))
             ) : (
@@ -200,9 +255,9 @@ const GetAllJobs: React.FC = () => {
               <button
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className={`px-3 py-1 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
+                className={`px-3 py-1 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 text-sm sm:text-base ${
                   currentPage > 1 ? "cursor-pointer" : ""
-                }`}
+                } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100`}
               >
                 Prev
               </button>
@@ -218,9 +273,7 @@ const GetAllJobs: React.FC = () => {
                     {index > 0 &&
                       filtered[index - 1] !== page - 1 &&
                       page !== 1 && (
-                        <span className="px-2 text-gray-900 dark:text-gray-100">
-                          ...
-                        </span>
+                        <span className="px-2 dark:text-gray-100">...</span>
                       )}
                     <button
                       onClick={() => goToPage(page)}
@@ -243,6 +296,28 @@ const GetAllJobs: React.FC = () => {
               </button>
             </div>
           )}
+          {/* Confirm Modal */}
+          <ConfirmModal
+            isOpen={isModalOpen}
+            message="Do you want to delete this job?"
+            onCancel={() => setIsModalOpen(false)}
+            onConfirm={() => {
+              if (selectedJobId !== null) {
+                handleDelete(selectedJobId);
+              }
+              setIsModalOpen(false);
+            }}
+          />
+          <EditJobModal
+            isOpen={editModalOpen}
+            jobId={editJobId}
+            userId={editUserId}
+            onClose={() => setEditModalOpen(false)}
+            onUpdated={() => {
+              jobService.getJobs().then((data) => setJobs(data));
+            }}
+            currentUserRole={userRole}
+          />
           {/* Toast */}
           {toast && (
             <div className="fixed top-4 right-4 z-[9999]">
@@ -261,4 +336,4 @@ const GetAllJobs: React.FC = () => {
   );
 };
 
-export default GetAllJobs;
+export default MyJobsPage;

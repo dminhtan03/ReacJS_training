@@ -10,7 +10,8 @@ interface EditJobModalProps {
   jobId: string | null;
   onClose: () => void;
   onUpdated: () => void;
-  currentUserRole?: string; // Thêm prop userRole
+  currentUserRole?: string;
+  userId: string; // owner id of the job
 }
 
 const EditJobModal: React.FC<EditJobModalProps> = ({
@@ -18,7 +19,8 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
   jobId,
   onClose,
   onUpdated,
-  currentUserRole = "USER", // Default là user
+  currentUserRole = "USER",
+  userId,
 }) => {
   const [formData, setFormData] = useState<Partial<JobFormData>>({
     company: "",
@@ -33,10 +35,16 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
     type: "success" | "error";
   } | null>(null);
 
-  // Kiểm tra xem user có phải admin không
-  console.log("USER ROLE:", currentUserRole);
-  
+  const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
+  const userIdStorage: string | undefined = reduxState?.auth?.id;
   const isAdmin = currentUserRole === "ADMIN";
+  const isOwner = String(userId) === String(userIdStorage);
+
+  // Quyền
+  const canEditFull = isAdmin && isOwner; // admin sửa bài của mình
+  const canEditStatusOnly = isAdmin && !isOwner; // admin sửa bài người khác
+  const canEditWithoutStatus = !isAdmin && isOwner; // user sửa bài của mình
+  const noPermission = !isOwner && !isAdmin; // user sửa bài người khác => không cho phép
 
   useEffect(() => {
     if (jobId && isOpen) {
@@ -54,129 +62,117 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    
-    // Real-time validation chỉ cho các trường được phép edit
+
     const newErrors = { ...errors };
-    
-    // Validation cho user (không phải admin)
-    if (!isAdmin) {
-      if (field === 'company') {
-        if (!value.trim()) {
-          newErrors.company = "Company name is required";
-        } else if (value.trim().length < 2) {
-          newErrors.company = "Company name must be at least 2 characters";
-        } else {
-          delete newErrors.company;
-        }
-      }
-      
-      if (field === 'position') {
-        if (!value.trim()) {
-          newErrors.position = "Job position is required";
-        } else if (value.trim().length < 2) {
-          newErrors.position = "Position must be at least 2 characters";
-        } else {
-          delete newErrors.position;
-        }
-      }
-      
-      if (field === 'notes') {
-        if (value.length > 500) {
-          newErrors.notes = "Notes cannot exceed 500 characters";
-        } else {
-          delete newErrors.notes;
-        }
+
+    // Validation cơ bản cho các trường được phép chỉnh
+    if (
+      (canEditFull || canEditWithoutStatus) &&
+      ["company", "position"].includes(field)
+    ) {
+      if (!value.trim()) {
+        newErrors[field] = `${field} is required`;
+      } else if (value.trim().length < 2) {
+        newErrors[field] = `${field} must be at least 2 characters`;
+      } else {
+        delete newErrors[field];
       }
     }
-    
-    // Validation cho admin (chỉ status)
-    if (isAdmin && field === 'status') {
+
+    if ((canEditFull || canEditStatusOnly) && field === "status") {
       if (!value.trim()) {
         newErrors.status = "Status is required";
       } else {
         delete newErrors.status;
       }
     }
-    
+
+    if ((canEditFull || canEditWithoutStatus) && field === "notes") {
+      if (value.length > 500) {
+        newErrors.notes = "Notes cannot exceed 500 characters";
+      } else {
+        delete newErrors.notes;
+      }
+    }
+
     setErrors(newErrors);
   };
 
-  // Kiểm tra form có hợp lệ không
   const isFormValid = () => {
+    if (noPermission) return false;
     const hasErrors = Object.keys(errors).length > 0;
-    
-    if (isAdmin) {
-      // Admin chỉ cần status hợp lệ
-      return !hasErrors && formData.status?.trim();
-    } else {
-      // User cần company và position hợp lệ
-      const hasRequiredFields = formData.company?.trim() && formData.position?.trim();
-      return !hasErrors && hasRequiredFields;
+
+    if (canEditFull) {
+      return (
+        !hasErrors &&
+        formData.company?.trim() &&
+        formData.position?.trim() &&
+        formData.status?.trim()
+      );
     }
+    if (canEditStatusOnly) {
+      return !hasErrors && formData.status?.trim();
+    }
+    if (canEditWithoutStatus) {
+      return (
+        !hasErrors && formData.company?.trim() && formData.position?.trim()
+      );
+    }
+    return false;
   };
 
   const clearData = () => {
-     setFormData({
-      company: "",
-      position: "",
-      status: "Pending",
-      notes: "",
-    });
+    setFormData({ company: "", position: "", status: "Pending", notes: "" });
   };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // Double check validation trước khi submit
       if (!isFormValid()) {
-        setToast({ message: "Please fix all errors before submitting", type: "error" });
+        setToast({
+          message: "Please fix all errors before submitting",
+          type: "error",
+        });
         setIsSubmitting(false);
         return;
       }
-      
+
       if (jobId) {
-        let updateData: any;
-        
-        if (isAdmin) {
-          // Admin chỉ update status
+        let updateData: any = {};
+
+        if (canEditFull) {
           updateData = {
+            company: formData.company?.trim(),
+            position: formData.position?.trim(),
             status: formData.status?.trim(),
+            notes: formData.notes?.trim() || "",
           };
-        } else {
-          // User update tất cả trừ status
+        } else if (canEditStatusOnly) {
+          updateData = { status: formData.status?.trim() };
+        } else if (canEditWithoutStatus) {
           updateData = {
             company: formData.company?.trim(),
             position: formData.position?.trim(),
             notes: formData.notes?.trim() || "",
           };
         }
-        
+
         await jobService.updateJob(jobId, updateData);
 
-        const successMessage = isAdmin 
-          ? "Job status updated successfully! 🎉"
-          : "Job application updated successfully! 🎉";
-
         setToast({
-          message: successMessage,
+          message: "Job updated successfully! 🎉",
           type: "success",
         });
 
         setTimeout(() => {
-          onUpdated(); // reload job list
+          onUpdated();
           onClose();
           clearData();
         }, 1000);
       }
     } catch (error) {
       console.error("Update failed", error);
-      const errorMessage = isAdmin
-        ? "Failed to update job status"
-        : "Failed to update job application";
-      setToast({ 
-        message: errorMessage, 
-        type: "error" 
-      });
+      setToast({ message: "Failed to update job", type: "error" });
     } finally {
       setIsSubmitting(false);
     }
@@ -190,96 +186,102 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
   };
 
   if (!isOpen) return null;
+  if (noPermission) {
+    return (
+      <div
+        className="fixed inset-0 z-1001 flex items-center justify-center mt-14"
+        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      >
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-md">
+          <p className="text-red-500 font-semibold text-center">
+            You do not have permission to edit this job.
+          </p>
+          <button
+            onClick={handleClose}
+            className="mt-4 w-full py-2 bg-gray-300 rounded-lg"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
       className="fixed inset-0 z-1001 flex items-center justify-center mt-14"
       style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
     >
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-2xl custom_desktop relative max-h-[90vh] overflow-y-auto border dark:border-gray-700">
-        {/* Close Button */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={handleClose}
-          className="absolute cursor-pointer top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
         >
-          <X className="w-5 h-5 cursor-pointer" />
+          <X className="w-5 h-5" />
         </button>
 
-        {/* Header */}
         <div className="text-center mb-6">
-          <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
-            isAdmin ? 'bg-purple-100 dark:bg-purple-900' : 'bg-blue-100 dark:bg-blue-900'
-          }`}>
+          <div
+            className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${
+              isAdmin ? "bg-purple-100" : "bg-blue-100"
+            }`}
+          >
             {isAdmin ? (
-              <Shield className="w-8 h-8 text-purple-600 dark:text-purple-300" />
+              <Shield className="w-8 h-8 text-purple-600" />
             ) : (
-              <Briefcase className="w-8 h-8 text-blue-600 dark:text-blue-300" />
+              <Briefcase className="w-8 h-8 text-blue-600" />
             )}
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            {isAdmin ? "Update Job Status" : "Edit Job"}
+          <h1 className="text-2xl font-bold">
+            {isAdmin ? "Edit Job (Admin)" : "Edit Job"}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            {isAdmin 
-              ? "Update the application status as an administrator"
-              : "Update your job application details"
-            }
-          </p>
         </div>
 
-        {/* Form */}
         <div className="space-y-6">
-          <FormField label="Company Name" error={errors.company} required={!isAdmin}>
+          <FormField
+            label="Company Name"
+            error={errors.company}
+            required={canEditFull || canEditWithoutStatus}
+          >
             <Input
               type="text"
               value={formData.company}
               onChange={(e) => handleInputChange("company", e.target.value)}
-              disabled={isSubmitting || isAdmin}
-              readOnly={isAdmin}
-              error={!!errors.company}
-              className={`text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400 ${isAdmin ? "bg-gray-100 dark:bg-gray-600 cursor-not-allowed" : ""}`}
+              disabled={!(canEditFull || canEditWithoutStatus) || isSubmitting}
             />
           </FormField>
 
-          <FormField label="Job Position" error={errors.position} required={!isAdmin}>
+          <FormField
+            label="Job Position"
+            error={errors.position}
+            required={canEditFull || canEditWithoutStatus}
+          >
             <Input
               type="text"
               value={formData.position}
               onChange={(e) => handleInputChange("position", e.target.value)}
-              disabled={isSubmitting || isAdmin}
-              readOnly={isAdmin}
-              error={!!errors.position}
-              className={`text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400 ${isAdmin ? "bg-gray-100 dark:bg-gray-600 cursor-not-allowed" : ""}`}
+              disabled={!(canEditFull || canEditWithoutStatus) || isSubmitting}
             />
           </FormField>
 
-          <FormField label="Application Status" error={errors.status} required={isAdmin}>
-            {isAdmin ? (
+          <FormField
+            label="Application Status"
+            error={errors.status}
+            required={canEditFull || canEditStatusOnly}
+          >
+            {canEditFull || canEditStatusOnly ? (
               <select
                 value={formData.status}
                 onChange={(e) => handleInputChange("status", e.target.value)}
                 disabled={isSubmitting}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm sm:text-base"
+                className="w-full px-3 py-2 border rounded-lg"
               >
                 <option value="Pending">Pending</option>
                 <option value="Approved">Approved</option>
                 <option value="Rejected">Rejected</option>
               </select>
             ) : (
-              <div className="relative">
-                <Input
-                  type="text"
-                  value={formData.status}
-                  readOnly={true}
-                  disabled={true}
-                  className="bg-gray-100 dark:bg-gray-600 cursor-not-allowed text-sm sm:text-base border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-                />
-              </div>
-            )}
-            {!isAdmin && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Status can only be changed by administrators
-              </p>
+              <Input type="text" value={formData.status} readOnly disabled />
             )}
           </FormField>
 
@@ -288,47 +290,35 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
               rows={4}
               value={formData.notes}
               onChange={(e) => handleInputChange("notes", e.target.value)}
-              disabled={isSubmitting || isAdmin}
-              readOnly={isAdmin}
-              className={`text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400 ${isAdmin ? "bg-gray-100 dark:bg-gray-600 cursor-not-allowed" : ""}`}
+              disabled={!(canEditFull || canEditWithoutStatus) || isSubmitting}
             />
           </FormField>
 
-          {/* Buttons */}
           <div className="flex gap-4">
             <button
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting || !isFormValid()}
-              className={`flex-1 py-3 px-6 rounded-lg font-semibold text-white transition text-sm sm:text-base ${
-                isSubmitting || !isFormValid()
-                  ? "bg-gray-400 dark:bg-gray-600 cursor-not-allowed"
-                  : isAdmin
-                  ? "bg-violet-600 cursor-pointer hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600 focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-                  : "bg-violet-600 cursor-pointer hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-600 focus:ring-2 focus:ring-violet-600 dark:focus:ring-violet-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-              }`}
+              className="flex-1 py-3 px-6 rounded-lg font-semibold text-white bg-violet-600 hover:bg-violet-700"
             >
-              {isSubmitting 
-                ? (isAdmin ? "Updating Status..." : "Updating...") 
-                : (isAdmin ? "Update Status" : "Update Job")
-              }
+              {isSubmitting ? "Updating..." : "Update Job"}
             </button>
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 py-3 px-6 rounded-lg cursor-pointer font-semibold border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm sm:text-base focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+              className="flex-1 py-3 px-6 rounded-lg border"
             >
               Cancel
             </button>
           </div>
         </div>
+
         {toast && (
           <div className="fixed top-4 right-4 z-[9999]">
             <Toast
               message={toast.message}
               type={toast.type}
               onClose={() => setToast(null)}
-              className="max-w-[90%] sm:max-w-sm"
             />
           </div>
         )}

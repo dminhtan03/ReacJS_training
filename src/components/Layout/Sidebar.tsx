@@ -16,7 +16,8 @@ const Sidebar: React.FC = () => {
   };
 
   const getLinkClass = (path: string) => {
-    const baseClass = "block p-2 mb-2 font-semibold rounded transition dark:text-white";
+    const baseClass =
+      "block p-2 mb-2 font-semibold rounded transition dark:text-white";
     const activeClass = "bg-violet-600 text-white";
     const inactiveClass =
       "text-gray-700 hover:bg-violet-200 hover:text-violet-800";
@@ -30,7 +31,8 @@ const Sidebar: React.FC = () => {
         ${isCollapsed ? "w-16" : "w-[220px]"} 
         bg-gray-100 p-4 transition-all duration-300
         hidden md:block dark:bg-[#111827] dark:text-white
-      ` }  style={{height: "100vh"}}
+      `}
+      style={{ height: "100vh" }}
     >
       {/* Toggle Button - Only visible on desktop */}
       <button
@@ -41,21 +43,32 @@ const Sidebar: React.FC = () => {
           <Menu className="w-5 h-5" />
         ) : (
           <div className="flex items-center justify-between w-full">
-            <span className="mr-5 font-bold text-xl dark:text-white">MENU</span> <X className="w-5 h-5 dark:text-white" />
-
+            <span className="mr-5 font-bold text-xl dark:text-white">MENU</span>{" "}
+            <X className="w-5 h-5 dark:text-white" />
           </div>
         )}
       </button>
 
       {/* Navigation */}
       <nav>
-        <Link
-          to="/"
-          className={getLinkClass("/")}
-          title={isCollapsed ? "Dashboard" : ""}
-        >
-          {isCollapsed ? "🏠" : "🏠 Dashboard"}
-        </Link>
+        {userRole === "USER" && (
+          <Link
+            to="/"
+            className={getLinkClass("/")}
+            title={isCollapsed ? "My Jobs" : ""}
+          >
+            {isCollapsed ? "🏠" : "🏠 My Jobs"}
+          </Link>
+        )}
+        {userRole === "ADMIN" && (
+          <Link
+            to="/"
+            className={getLinkClass("/")}
+            title={isCollapsed ? "Dashboard" : ""}
+          >
+            {isCollapsed ? "🏠" : "🏠 Dashboard"}
+          </Link>
+        )}
         {/* Chỉ hiển thị nếu là USER */}
         {userRole === "USER" && (
           <Link
@@ -64,6 +77,15 @@ const Sidebar: React.FC = () => {
             title={isCollapsed ? "All Jobs" : ""}
           >
             {isCollapsed ? "📄" : "📄 All Jobs"}
+          </Link>
+        )}
+        {userRole === "ADMIN" && (
+          <Link
+            to="/myJobs"
+            className={getLinkClass("/myJobs")}
+            title={isCollapsed ? "My Jobs" : ""}
+          >
+            {isCollapsed ? "📄" : "📄 My Jobs"}
           </Link>
         )}
 
