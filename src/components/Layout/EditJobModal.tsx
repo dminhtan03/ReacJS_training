@@ -27,6 +27,9 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
     position: "",
     status: "Pending",
     notes: "",
+    employeeName: "",
+    phoneNumber: "",
+    email: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -45,7 +48,6 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
   const canEditStatusOnly = isAdmin && !isOwner; // admin sửa bài người khác
   const canEditWithoutStatus = !isAdmin && isOwner; // user sửa bài của mình
   const noPermission = !isOwner && !isAdmin; // user sửa bài người khác => không cho phép
-
   useEffect(() => {
     if (jobId && isOpen) {
       jobService.getJobById(jobId).then((data) => {
@@ -54,6 +56,9 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
           position: data.position,
           status: data.status,
           notes: data.notes,
+          email: data.email,
+          employeeName: data.employeeName,
+          phoneNumber: data.phoneNumber
         });
       });
       setToast(null);
@@ -68,7 +73,7 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
     // Validation cơ bản cho các trường được phép chỉnh
     if (
       (canEditFull || canEditWithoutStatus) &&
-      ["company", "position"].includes(field)
+      ["company", "position", "employeeName", "phoneNumber", "email", "notes"].includes(field)
     ) {
       if (!value.trim()) {
         newErrors[field] = `${field} is required`;
@@ -79,6 +84,26 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
       }
     }
 
+    if ((canEditFull || canEditWithoutStatus) && field === "email") {
+      if (!value.trim()) {
+          newErrors.email = "Email address is required";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+          newErrors.email = "Please enter a valid email address";
+        } else {
+          delete newErrors.email;
+        }
+    }
+
+    if ((canEditFull || canEditWithoutStatus) && field === "phoneNumber") {
+     if (!value.trim()) {
+          newErrors.phoneNumber = "Phone number is required";
+        } else if (!/^[\+]?[0-9\s\-\(\)]{8,15}$/.test(value.trim())) {
+          newErrors.phoneNumber = "Please enter a valid phone number";
+        } else {
+          delete newErrors.phoneNumber;
+        }
+    }
+
     if ((canEditFull || canEditStatusOnly) && field === "status") {
       if (!value.trim()) {
         newErrors.status = "Status is required";
@@ -86,6 +111,8 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
         delete newErrors.status;
       }
     }
+
+    
 
     if ((canEditFull || canEditWithoutStatus) && field === "notes") {
       if (value.length > 500) {
@@ -146,6 +173,9 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
             position: formData.position?.trim(),
             status: formData.status?.trim(),
             notes: formData.notes?.trim() || "",
+            employeeName: formData.employeeName?.trim(),
+            phoneNumber: formData.phoneNumber?.trim(),
+            email: formData.email?.trim(),
           };
         } else if (canEditStatusOnly) {
           updateData = { status: formData.status?.trim() };
@@ -171,7 +201,6 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
         }, 1000);
       }
     } catch (error) {
-      console.error("Update failed", error);
       setToast({ message: "Failed to update job", type: "error" });
     } finally {
       setIsSubmitting(false);
@@ -209,7 +238,7 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-1001 flex items-center justify-center mt-14"
+      className="fixed inset-0 z-1001 flex items-center justify-center "
       style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
     >
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
@@ -238,31 +267,90 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
         </div>
 
         <div className="space-y-6">
-          <FormField
-            label="Company Name"
-            error={errors.company}
-            required={canEditFull || canEditWithoutStatus}
-          >
-            <Input
-              type="text"
-              value={formData.company}
-              onChange={(e) => handleInputChange("company", e.target.value)}
-              disabled={!(canEditFull || canEditWithoutStatus) || isSubmitting}
-            />
-          </FormField>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              label="Company Name"
+              error={errors.company}
+              required={canEditFull || canEditWithoutStatus}
+            >
+              <Input
+                type="text"
+                value={formData.company}
+                onChange={(e) => handleInputChange("company", e.target.value)}
+                disabled={!(canEditFull || canEditWithoutStatus) || isSubmitting}
+              />
+            </FormField>
 
-          <FormField
-            label="Job Position"
-            error={errors.position}
-            required={canEditFull || canEditWithoutStatus}
-          >
-            <Input
-              type="text"
-              value={formData.position}
-              onChange={(e) => handleInputChange("position", e.target.value)}
-              disabled={!(canEditFull || canEditWithoutStatus) || isSubmitting}
-            />
-          </FormField>
+            <FormField
+              label="Job Position"
+              error={errors.position}
+              required={canEditFull || canEditWithoutStatus}
+            >
+              <Input
+                type="text"
+                value={formData.position}
+                onChange={(e) => handleInputChange("position", e.target.value)}
+                disabled={!(canEditFull || canEditWithoutStatus) || isSubmitting}
+              />
+            </FormField>
+          </div>
+          
+          {/* Employee Information Section */}
+                        <div className="border-t dark:border-gray-700 pt-6">
+                          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                            Contact Information
+                          </h3>
+          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <FormField
+                              label="Employee Name"
+                              error={errors.employeeName}
+                              required={canEditFull || canEditWithoutStatus}
+
+                            >
+                              <Input
+                                type="text"
+                                value={formData.employeeName}
+                                onChange={(e) =>
+                                  handleInputChange("employeeName", e.target.value)
+                                }
+                                disabled={!(canEditFull || canEditWithoutStatus) || isSubmitting}
+                                className="text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400"
+                              />
+                            </FormField>
+          
+                            <FormField
+                              label="Phone Number"
+                              error={errors.phoneNumber}
+                              required={canEditFull || canEditWithoutStatus}
+                            >
+                              <Input
+                                type="tel"
+                                value={formData.phoneNumber}
+                                onChange={(e) =>
+                                  handleInputChange("phoneNumber", e.target.value)
+                                }
+                                disabled={!(canEditFull || canEditWithoutStatus) || isSubmitting}
+                                className="text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400"
+                              />
+                            </FormField>
+                          </div>
+          
+                          <FormField
+                            label="Email Address"
+                            error={errors.email}
+                            className="mt-6"
+                            required={canEditFull || canEditWithoutStatus}
+                          >
+                            <Input
+                              type="email"
+                              value={formData.email}
+                              onChange={(e) => handleInputChange("email", e.target.value)}
+                              disabled={!(canEditFull || canEditWithoutStatus) || isSubmitting}
+                              className="text-sm sm:text-base border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-violet-600 dark:focus:ring-violet-400"
+                            />
+                          </FormField>
+                        </div>
 
           <FormField
             label="Application Status"
@@ -284,15 +372,16 @@ const EditJobModal: React.FC<EditJobModalProps> = ({
               <Input type="text" value={formData.status} readOnly disabled />
             )}
           </FormField>
-
-          <FormField label="Notes" error={errors.notes}>
-            <Textarea
-              rows={4}
-              value={formData.notes}
-              onChange={(e) => handleInputChange("notes", e.target.value)}
-              disabled={!(canEditFull || canEditWithoutStatus) || isSubmitting}
-            />
-          </FormField>
+            <div className="border-t dark:border-gray-700 pt-6">
+            <FormField label="Notes" error={errors.notes}>
+              <Textarea
+                rows={4}
+                value={formData.notes}
+                onChange={(e) => handleInputChange("notes", e.target.value)}
+                disabled={!(canEditFull || canEditWithoutStatus) || isSubmitting}
+              />
+            </FormField>
+          </div>
 
           <div className="flex gap-4">
             <button

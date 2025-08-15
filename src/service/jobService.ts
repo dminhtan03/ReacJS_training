@@ -29,6 +29,8 @@ export const getJobById = async (id: string) => {
   try {
     const res = await axios.get(`${API_URL}/${id}`);
     return res.data;
+    console.log("Res data: ", res.data);
+    
   } catch (error) {
     console.error("Error fetching job:", error);
     throw error;

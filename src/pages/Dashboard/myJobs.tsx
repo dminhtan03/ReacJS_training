@@ -18,6 +18,7 @@ interface JobFormData {
   dateAdded: string;
   userId: string;
   role: string;
+  employeeName: string;
 }
 
 const MyJobsPage: React.FC = () => {
@@ -148,6 +149,8 @@ const MyJobsPage: React.FC = () => {
     currentPage * itemsPerPage
   );
 
+  
+
   const goToPage = (page: number) => {
     if (page < 1) page = 1;
     else if (page > totalPages) page = totalPages;
@@ -236,6 +239,7 @@ const MyJobsPage: React.FC = () => {
                   notes={job.notes}
                   role={userRole}
                   userId={job.userId}
+                  employeeName={job.employeeName}
                   onEdit={() => handleEdit(job.id, job.userId)}
                   onDelete={() => {
                     setSelectedJobId(job.id);

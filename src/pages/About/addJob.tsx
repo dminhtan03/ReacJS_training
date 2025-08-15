@@ -21,6 +21,7 @@ const AddJobForm: React.FC = () => {
   const isUser = role === "user";
   const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
   const userId: string | undefined = reduxState?.auth?.id;
+  const username: string | undefined = reduxState?.auth?.firstName;
 
   const [formData, setFormData] = useState<Partial<JobFormData>>({
     company: "",
@@ -185,6 +186,7 @@ const AddJobForm: React.FC = () => {
         phoneNumber: formData.phoneNumber?.trim() || "",
         email: formData.email?.trim() || "",
         dateAdded: new Date().toISOString(),
+        username: username,
         approvedBy:
           isAdmin && formData.status === "Approved" ? userId : undefined, // Track who approved
         userId: userId || "", // Track the user ID
@@ -219,12 +221,12 @@ const AddJobForm: React.FC = () => {
   return (
     <div className="w-full">
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <div className="flex min-h-[calc(100vh-64px)] pt-15 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      <div className="flex min-h-[calc(100vh-64px)] pt-15 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-4">
         {/* Sidebar: Hidden on mobile, visible on tablet/desktop */}
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out bg-white dark:bg-gray-800 border-r dark:border-gray-700`}
+          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out bg-white dark:bg-gray-800 `}
         >
           <Sidebar />
         </div>
@@ -238,12 +240,13 @@ const AddJobForm: React.FC = () => {
         <div className="flex-grow p-4 sm:p-6 md:p-8 mx-auto max-w-4xl " cla>
           {/* Header */}
           <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              Add Job
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Add new job to track
-            </p>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-violet-800 dark:from-gray-100 dark:via-blue-200 dark:to-violet-200 bg-clip-text text-transparent mb-2">
+                  Add Job
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Add new job to track
+                </p>
+          
           </div>
           {/* Form */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100 dark:border-gray-700">

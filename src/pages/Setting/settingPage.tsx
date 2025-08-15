@@ -10,12 +10,12 @@ const SettingsPage: React.FC = () => {
   return (
     <div className="w-full" style={{ height: "100vh" }}>
       <Header />
-      <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 pt-16">
+      <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 pt-16 mt-4">
         {/* Sidebar */}
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out bg-white dark:bg-gray-800 border-r dark:border-gray-700`}
+          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out bg-white dark:bg-gray-800`}
         >
           <Sidebar />
         </div>
