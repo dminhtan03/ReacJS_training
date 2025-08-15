@@ -43,4 +43,20 @@ export const authService = {
       throw error instanceof Error ? error : new Error("Lỗi không xác định");
     }
   },
+
+  profile: async (userId: string) => {
+    try {
+      const response = await fetch(
+        `https://689c2efc58a27b18087d282f.mockapi.io/api/v1/users/signup/${userId}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (!response.ok) throw new Error("Lấy thông tin người dùng thất bại");
+      return await response.json();
+    } catch (error) {
+      throw error instanceof Error ? error : new Error("Lỗi không xác định");
+    }
+  },
 };

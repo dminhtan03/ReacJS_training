@@ -169,7 +169,7 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="w-full dark:bg-gray-900 min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950/30">
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      
+
       <div className="flex min-h-[calc(100vh-64px)] pt-19">
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
@@ -178,14 +178,14 @@ const DashboardPage: React.FC = () => {
         >
           <Sidebar />
         </div>
-        
+
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30 md:hidden transition-all duration-300"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
-        
+
         <main className="flex-grow p-4 sm:p-6 md:p-8">
           {/* Header Section */}
           <div className="mb-8">
@@ -198,7 +198,7 @@ const DashboardPage: React.FC = () => {
                   Track and manage your job applications efficiently
                 </p>
               </div>
-              
+
               <Link
                 to="/add-job"
                 className="group mt-4 sm:mt-0 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold text-sm sm:text-base inline-flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
@@ -222,7 +222,7 @@ const DashboardPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
@@ -234,7 +234,7 @@ const DashboardPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
@@ -246,7 +246,7 @@ const DashboardPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
@@ -276,7 +276,7 @@ const DashboardPage: React.FC = () => {
                     }}
                   />
                 </div>
-                
+
                 <div className="relative">
                   <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <select
@@ -295,7 +295,7 @@ const DashboardPage: React.FC = () => {
                     ))}
                   </select>
                 </div>
-                
+
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <select
@@ -346,8 +346,8 @@ const DashboardPage: React.FC = () => {
                     No jobs found
                   </h3>
                   <p className="text-gray-500 dark:text-gray-400 mb-4">
-                    {searchTerm || filterStatus 
-                      ? "Try adjusting your search or filter criteria" 
+                    {searchTerm || filterStatus
+                      ? "Try adjusting your search or filter criteria"
                       : "Start by adding your first job application"
                     }
                   </p>
@@ -371,7 +371,7 @@ const DashboardPage: React.FC = () => {
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, visibleJobs.length)} of {visibleJobs.length} jobs
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => goToPage(currentPage - 1)}
@@ -380,7 +380,7 @@ const DashboardPage: React.FC = () => {
                 >
                   Previous
                 </button>
-                
+
                 <div className="flex items-center space-x-1">
                   {Array.from({ length: totalPages }, (_, i) => i + 1)
                     .filter(
@@ -409,7 +409,7 @@ const DashboardPage: React.FC = () => {
                       </React.Fragment>
                     ))}
                 </div>
-                
+
                 <button
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
@@ -433,7 +433,7 @@ const DashboardPage: React.FC = () => {
               setIsModalOpen(false);
             }}
           />
-          
+
           <EditJobModal
             isOpen={editModalOpen}
             jobId={editJobId}
@@ -444,7 +444,7 @@ const DashboardPage: React.FC = () => {
             }}
             currentUserRole={userRole}
           />
-          
+
           {/* Toast */}
           {toast && (
             <Toast
@@ -454,7 +454,7 @@ const DashboardPage: React.FC = () => {
             />
           )}
         </main>
-        
+
         <ScrollToTopButton />
       </div>
     </div>
