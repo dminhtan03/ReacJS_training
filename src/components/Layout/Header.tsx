@@ -4,11 +4,29 @@ import { Menu, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { logout } from "../store/slice/authSlice"; // ⚡ import action logout
+import { authService } from "../../service/authService"; // ⚡ import profile service
+import ProfileModal from "./ProfileModal"; // ⚡ import ProfileModal component
+interface ProfileFormData {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  department: string;
+  // gender: string;
+  // address: string;
+}
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // ⚡ trạng thái dropdown
+  const [showProfile, setShowProfile] = useState<ProfileFormData[]>([]);
+  const [profiletModalOpen, setProfileModalOpen] = useState(false);
+  const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
+
+  const userId: string | undefined = reduxState?.auth?.id;
+
   const dispatch = useDispatch();
 
   const { firstName, isAuthenticated } = useSelector(
@@ -24,6 +42,28 @@ const Header: React.FC = () => {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const handleProfileClick = async (userId: string) => {
+    try {
+      const userProfile = await authService.profile(userId);
+      console.log("User Profile:", userProfile);
+      setShowProfile(userProfile);
+      setProfileModalOpen(true);
+    } catch (error) {
+      console.error("Failed to fetch user profile:", error);
+    }
+  };
+
+  const handleSaveProfile = async (profileData: ProfileFormData) => {
+    try {
+      const updatedProfile = await authService.profile(profileData.userId);
+      setShowProfile(updatedProfile);
+      setProfileModalOpen(false);
+      console.log("Profile updated successfully:", updatedProfile);
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+    }
   };
 
   const handleNavigation = (path: string) => {
@@ -59,10 +99,9 @@ const Header: React.FC = () => {
             >
               About
             </button>
-            
 
             {/* ⚡ Dropdown user */}
-            {firstName ? (
+            {firstName && (
               <div className="relative">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -81,8 +120,18 @@ const Header: React.FC = () => {
                     <path d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
+
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 text-black dark:text-gray-100 rounded shadow-lg dark:shadow-gray-900/50 border dark:border-gray-700">
+                    {/* Link Profile */}
+                    <button
+                      onClick={() => handleProfileClick(userId || "")}
+                      className="block cursor-pointer w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white duration-200"
+                    >
+                      👤 Profile
+                    </button>
+
+                    {/* Logout */}
                     <button
                       onClick={handleLogout}
                       className="block cursor-pointer w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors dark:text-white duration-200"
@@ -92,13 +141,6 @@ const Header: React.FC = () => {
                   </div>
                 )}
               </div>
-            ) : (
-              <button
-                onClick={() => handleNavigation("/profile")}
-                className="font-medium text-sm lg:text-base hover:text-indigo-200 dark:hover:text-gray-300 transition-colors duration-200 px-2 py-1 rounded"
-              >
-                Profile
-              </button>
             )}
           </nav>
 
@@ -171,6 +213,14 @@ const Header: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Profile Modal */}
+
+      <ProfileModal
+        isOpen={profiletModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+        userProfile={showProfile}
+        onSave={handleSaveProfile}
+      />
 
       {/* Mobile Menu Backdrop */}
       {isMobileMenuOpen && (

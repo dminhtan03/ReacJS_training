@@ -169,9 +169,16 @@ const DashboardPage: React.FC = () => {
           />
         )}
         <main className="flex-grow p-4 sm:p-6 md:p-8 bg-white dark:bg-gray-900">
-          <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 dark:text-white">
-            All Jobs
-          </h1>
+          {userRole === "ADMIN" && (
+            <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 dark:text-white">
+              All Jobs
+            </h1>
+          )}
+          {userRole === "USER" && (
+            <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 dark:text-white">
+              My Jobs
+            </h1>
+          )}
           {/* Search & Filter */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <input
