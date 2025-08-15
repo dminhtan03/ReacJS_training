@@ -202,7 +202,7 @@ const GetAllJobs: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950">
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       
-      <div className="flex min-h-[calc(100vh-64px)] pt-16 mt-4">
+      <div className="flex min-h-[calc(100vh-64px)]  ">
         {/* Sidebar */}
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${

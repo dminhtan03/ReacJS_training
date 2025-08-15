@@ -170,7 +170,7 @@ const DashboardPage: React.FC = () => {
     <div className="w-full dark:bg-gray-900 min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950/30">
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-      <div className="flex min-h-[calc(100vh-64px)] pt-19">
+      <div className="flex min-h-[calc(100vh-64px)] ">
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
