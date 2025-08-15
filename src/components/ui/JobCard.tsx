@@ -58,7 +58,7 @@ const JobCard: React.FC<JobCardProps> = ({
       </div>
 
       {/* Nếu không phải USER mới hiển thị nút */}
-      {(role === "ADMIN" || userId === userIdStorage) && (
+      {( userId === userIdStorage) && (
         <div className="flex justify-end gap-2 mt-auto">
           <button
             className="bg-[#3B82F6] hover:bg-blue-600 cursor-pointer focus:bg-indigo-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
@@ -79,7 +79,7 @@ const JobCard: React.FC<JobCardProps> = ({
             <span className="hidden sm:inline">Delete</span>
           </button>
         </div>
-      )}
+       )}
     </div>
   );
 };

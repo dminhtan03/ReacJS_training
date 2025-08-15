@@ -5,6 +5,8 @@ import JobCard from "@/components/ui/JobCard";
 import ScrollToTopButton from "@/components/Layout/ScrollToTop";
 import * as jobService from "../../service/jobService";
 import { Check, X } from "lucide-react";
+import EditJobModal from "@/components/Layout/EditJobModal";
+import ConfirmModal from "@/components/Layout/ConfirmModal";
 
 interface JobFormData {
   id: string;
@@ -26,6 +28,10 @@ const GetAllJobs: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const itemsPerPage = 9;
   const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
+  const [editModalOpen, setEditModalOpen] = useState(false);
+    const [editJobId, setEditJobId] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+      const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const userRole: string | undefined = reduxState?.auth?.role;
   const userId: string | undefined = reduxState?.auth?.id;
   const [toast, setToast] = useState<{
@@ -96,13 +102,11 @@ const GetAllJobs: React.FC = () => {
     }
     return 0;
   });
-  const visibleJobs = sortedJobs.filter(
-    (job) => String(job.userId) !== String(userId)
-  );
+ 
 
   // Pagination
-  const totalPages = Math.ceil(visibleJobs.length / itemsPerPage);
-  const currentJobs = visibleJobs.slice(
+  const totalPages = Math.ceil(sortedJobs.length / itemsPerPage);
+  const currentJobs = sortedJobs.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -112,6 +116,28 @@ const GetAllJobs: React.FC = () => {
     else if (page > totalPages) page = totalPages;
     setCurrentPage(page);
   };
+
+  // Delete job
+    const handleDelete = (id: string) => {
+      jobService
+        .deleteJob(id)
+        .then(() => {
+          setJobs((prev) => prev.filter((job) => job.id !== id));
+          setToast({ message: "Job deleted successfully!", type: "success" });
+        })
+        .catch(() => {
+          setToast({ message: "Failed to delete job!", type: "error" });
+        });
+    };
+  
+    // Edit job
+    const handleEdit = async (id: string) => {
+      try {
+        const job = await jobService.getJobById(id);
+        setEditJobId(id);
+        setEditModalOpen(true);
+      } catch (error) {}
+    };
 
   return (
     <div className="w-full" style={{ height: "100vh" }}>
@@ -155,10 +181,10 @@ const GetAllJobs: React.FC = () => {
               }}
             >
               <option value="">All Status</option>
-              <option className="custom_option_mobile" value="Pending">
+              <option value="Pending">
                 Pending
               </option>
-              <option className="custom_option_mobile" value="Approved">
+              <option value="Approved">
                 Approved
               </option>
               <option value="Rejected">Rejected</option>
@@ -187,7 +213,13 @@ const GetAllJobs: React.FC = () => {
                   status={job.status}
                   date={new Date(job.dateAdded).toLocaleDateString()}
                   notes={job.notes}
+                  userId={job.userId}
                   role={userRole}
+                  onEdit={() => handleEdit(job.id)}
+                  onDelete={() => {
+                    setSelectedJobId(job.id);
+                    setIsModalOpen(true);
+                  }}
                 />
               ))
             ) : (
@@ -256,6 +288,29 @@ const GetAllJobs: React.FC = () => {
               />
             </div>
           )}
+
+          {/* Confirm Modal */}
+          <ConfirmModal
+            isOpen={isModalOpen}
+            message="Do you want to delete this job?"
+            onCancel={() => setIsModalOpen(false)}
+            onConfirm={() => {
+              if (selectedJobId !== null) {
+                handleDelete(selectedJobId);
+              }
+              setIsModalOpen(false);
+            }}
+          />
+          <EditJobModal
+            isOpen={editModalOpen}
+            jobId={editJobId}
+            onClose={() => setEditModalOpen(false)}
+            onUpdated={() => {
+              jobService.getJobs().then((data) => setJobs(data));
+            }}
+            currentUserRole={userRole}
+          />
+          
         </main>
         <ScrollToTopButton />
       </div>
