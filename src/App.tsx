@@ -18,6 +18,8 @@ import ForbiddenPage from "./pages/ErrorPage/403";
 import SettingsPage from "./pages/Setting/settingPage";
 import GetAllJobs from "./pages/Dashboard/getAllJobs";
 import MyJobsPage from "./pages/Dashboard/myJobs";
+import ProfilePage from "./pages/Profile";
+import ManageUsersPage from "./pages/Admin/User";
 // Main App Component
 function App() {
   const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
@@ -67,6 +69,15 @@ function App() {
               </PrivateRoute>
             }
           />
+
+          <Route
+            path="/users"
+            element={
+              <PrivateRoute allowedRoles={["ADMIN"]}>
+                <ManageUsersPage />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/add-job"
             element={
@@ -80,6 +91,14 @@ function App() {
             element={
               <PrivateRoute allowedRoles={["ADMIN", "USER"]}>
                 <SettingsPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute allowedRoles={["ADMIN", "USER"]}>
+                <ProfilePage />
               </PrivateRoute>
             }
           />

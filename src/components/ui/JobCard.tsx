@@ -176,7 +176,7 @@ const JobCard: React.FC<JobCardProps> = ({
         </div>
 
         {/* Action buttons */}
-        {userId === userIdStorage && (
+        {(userId === userIdStorage || role === "ADMIN") && (
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100/80 dark:border-gray-700/50">
             <button
               className="group/edit relative bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 hover:from-blue-600 hover:via-blue-700 hover:to-indigo-700 text-white px-5 py-3 rounded-xl text-sm font-bold flex items-center gap-2.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 dark:focus:ring-offset-gray-800 shadow-lg hover:shadow-2xl transform hover:scale-105 active:scale-95 overflow-hidden"

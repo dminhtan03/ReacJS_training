@@ -27,6 +27,7 @@ const Header: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
   const userId: string | undefined = reduxState?.auth?.id;
+  const role: string | undefined = reduxState?.auth?.role;
   const dispatch = useDispatch();
 
   const { firstName, isAuthenticated } = useSelector(
@@ -228,7 +229,7 @@ const Header: React.FC = () => {
                         {/* Menu Items */}
                         <div className="p-3 space-y-1">
                           <button
-                            onClick={() => handleProfileClick(userId || "")}
+                            onClick={() => handleNavigation("/profile")}
                             className="flex items-center gap-4 w-full px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:text-violet-600 dark:hover:text-violet-400 rounded-2xl transition-all duration-200 group"
                           >
                             <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-200">
@@ -239,6 +240,22 @@ const Header: React.FC = () => {
                               <p className="text-xs opacity-60">Manage your information</p>
                             </div>
                           </button>
+
+                          {role === "ADMIN" && (
+                               <button
+                            onClick={() => handleNavigation("/users")}
+                            className="flex items-center gap-4 w-full px-4 py-4 text-left text-gray-700 dark:text-gray-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:text-violet-600 dark:hover:text-violet-400 rounded-2xl transition-all duration-200 group"
+                          >
+                            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-500 rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-200">
+                              <User className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Manage Users</p>
+                              <p className="text-xs opacity-60">Manage your information</p>
+                            </div>
+                          </button>
+                          )}
+                         
                           
                           <button
                             onClick={() => handleNavigation("/settings")}
@@ -342,6 +359,14 @@ const Header: React.FC = () => {
                   >
                     <User className="w-5 h-5" />
                     Profile
+                  </button>
+
+                  <button
+                    onClick={() => handleNavigation("/profile")}
+                    className="flex items-center gap-4 w-full px-6 py-4 text-left text-gray-700 dark:text-gray-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:text-violet-600 dark:hover:text-violet-400 rounded-2xl transition-all duration-200 font-medium"
+                  >
+                    <User className="w-5 h-5" />
+                    Profile 2
                   </button>
                   
                   <button
