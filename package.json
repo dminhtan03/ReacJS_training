@@ -18,6 +18,8 @@
     "@reduxjs/toolkit": "^2.8.2",
     "antd": "^5.26.2",
     "axios": "^1.11.0",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.5.31",
     "lucide-react": "^0.539.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

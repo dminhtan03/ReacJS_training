@@ -332,9 +332,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                           {getInitials()}
                         </span>
                       </div>
-                      {/* <button className="absolute -bottom-2 -right-2 bg-white/20 backdrop-blur-md p-2 rounded-full border-2 border-white/30 hover:bg-white/30 transition-colors">
+                      <button className="absolute -bottom-2 -right-2 bg-white/20 backdrop-blur-md p-2 rounded-full border-2 border-white/30 hover:bg-white/30 transition-colors">
                         <Camera className="w-4 h-4 text-white" />
-                      </button> */}
+                      </button>
                     </div>
                     <h2 className="text-2xl font-bold mb-1">
                       {profile.firstName} {profile.lastName}

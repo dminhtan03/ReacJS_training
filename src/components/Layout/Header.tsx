@@ -354,20 +354,23 @@ const Header: React.FC = () => {
                   </div>
                   
                   <button
-                    onClick={() => handleProfileClick(userId || "")}
+                    onClick={() => handleNavigation("/profile")}
                     className="flex items-center gap-4 w-full px-6 py-4 text-left text-gray-700 dark:text-gray-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:text-violet-600 dark:hover:text-violet-400 rounded-2xl transition-all duration-200 font-medium"
                   >
                     <User className="w-5 h-5" />
                     Profile
                   </button>
 
-                  <button
+                  {role === "ADMIN" && (
+                      <button
                     onClick={() => handleNavigation("/profile")}
                     className="flex items-center gap-4 w-full px-6 py-4 text-left text-gray-700 dark:text-gray-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 hover:text-violet-600 dark:hover:text-violet-400 rounded-2xl transition-all duration-200 font-medium"
                   >
                     <User className="w-5 h-5" />
-                    Profile 2
+                    Manage users
                   </button>
+                  )}
+                  
                   
                   <button
                     onClick={handleLogout}
