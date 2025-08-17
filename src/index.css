@@ -2,7 +2,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Responsive container styles */
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .container-responsive {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
@@ -27,4 +27,4 @@
   .custom_option_mobile {
     width: 398px;
   }
-}
+} */
