@@ -80,30 +80,24 @@ const Header: React.FC = () => {
   };
 
   const handleProfileClick = async (userId: string) => {
-    setIsLoading(true);
     try {
       const userProfile = await authService.profile(userId);
+      console.log("User Profile:", userProfile);
       setShowProfile(userProfile);
       setProfileModalOpen(true);
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleSaveProfile = async (profileData: ProfileFormData) => {
-    setIsLoading(true);
     try {
-      const updatedProfile = await authService.updateProfile(profileData);
+      const updatedProfile = await authService.profile(profileData.userId);
       setShowProfile(updatedProfile);
       setProfileModalOpen(false);
-      toast.success("Profile updated successfully!");
+      console.log("Profile updated successfully:", updatedProfile);
     } catch (error) {
       console.error("Failed to update profile:", error);
-      toast.error("Failed to update profile. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -274,113 +268,113 @@ const Header: React.FC = () => {
             </button>
           </div>
         </div>
-      </header>
 
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-40 md:hidden">
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
 
-          <div className="absolute top-0 right-0 h-full w-80 max-w-[85vw] bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-2xl animate-in slide-in-from-right duration-300">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl">
-                    <Briefcase className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100">
-                      JobTracker
-                    </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Mobile Menu
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                </button>
-              </div>
-            </div>
-
-            <nav className="p-4 space-y-2">
-              {menuItems.map((item, index) => {
-                const IconComponent = item.icon;
-                return (
-                  <button
-                    key={item.path}
-                    onClick={() => handleNavigation(item.path)}
-                    className="group w-full flex items-center gap-4 px-4 py-4 text-left rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 transition-all duration-300 hover:scale-105 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/30 transition-all duration-300 group-hover:rotate-12">
-                      <IconComponent className="w-5 h-5" />
-                    </div>
-                    <span className="font-medium">{item.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-              {firstName ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-700 rounded-xl">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
-                      {firstName.charAt(0).toUpperCase()}
+            <div className="absolute top-0 right-0 h-full w-80 max-w-[85vw] bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl shadow-2xl animate-in slide-in-from-right duration-300">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl">
+                      <Briefcase className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 dark:text-gray-100">
-                        {firstName}
-                      </p>
+                      <h2 className="font-bold text-lg text-gray-900 dark:text-gray-100">
+                        JobTracker
+                      </h2>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Job Hunter
+                        Mobile Menu
                       </p>
                     </div>
                   </div>
                   <button
-                    onClick={handleLogout}
-                    className="group w-full flex items-center gap-4 px-4 py-4 text-left rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 text-red-600 dark:text-red-400"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="p-2 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                   >
-                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg group-hover:rotate-12 transition-transform">
-                      <LogOut className="w-5 h-5" />
-                    </div>
-                    <span className="font-medium">Sign Out</span>
+                    <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                   </button>
                 </div>
-              ) : (
-                <button
-                  onClick={() => handleNavigation("/profile")}
-                  className="group w-full flex items-center gap-4 px-4 py-4 text-left rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 transition-all duration-300 text-gray-700 dark:text-gray-300"
-                >
-                  <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/30 transition-all duration-300 group-hover:rotate-12">
-                    <User className="w-5 h-5" />
-                  </div>
-                  <span className="font-medium">Profile</span>
-                </button>
-              )}
-            </div>
+              </div>
 
-            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                JobTracker v2.0 - Premium Edition
-              </p>
+              <nav className="p-4 space-y-2">
+                {menuItems.map((item, index) => {
+                  const IconComponent = item.icon;
+                  return (
+                    <button
+                      key={item.path}
+                      onClick={() => handleNavigation(item.path)}
+                      className="group w-full flex items-center gap-4 px-4 py-4 text-left rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 transition-all duration-300 hover:scale-105 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/30 transition-all duration-300 group-hover:rotate-12">
+                        <IconComponent className="w-5 h-5" />
+                      </div>
+                      <span className="font-medium">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+
+              <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+                {firstName ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-700 rounded-xl">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                        {firstName.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 dark:text-gray-100">
+                          {firstName}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Job Hunter
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="group w-full flex items-center gap-4 px-4 py-4 text-left rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 text-red-600 dark:text-red-400"
+                    >
+                      <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg group-hover:rotate-12 transition-transform">
+                        <LogOut className="w-5 h-5" />
+                      </div>
+                      <span className="font-medium">Sign Out</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleNavigation("/profile")}
+                    className="group w-full flex items-center gap-4 px-4 py-4 text-left rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 transition-all duration-300 text-gray-700 dark:text-gray-300"
+                  >
+                    <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/30 transition-all duration-300 group-hover:rotate-12">
+                      <User className="w-5 h-5" />
+                    </div>
+                    <span className="font-medium">Profile</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                  JobTracker v2.0 - Premium Edition
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <ProfileModal
-        isOpen={profileModalOpen}
-        onClose={() => setProfileModalOpen(false)}
-        userProfile={showProfile}
-        onSave={handleSaveProfile}
-      />
+        <ProfileModal
+          isOpen={profileModalOpen}
+          onClose={() => setProfileModalOpen(false)}
+          userProfile={showProfile}
+          onSave={handleSaveProfile}
+        />
+      </header>
     </>
   );
 };
