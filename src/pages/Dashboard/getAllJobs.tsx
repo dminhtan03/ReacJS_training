@@ -202,7 +202,7 @@ const GetAllJobs: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950">
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       
-      <div className="flex min-h-[calc(100vh-64px)] pt-16 mt-4">
+      <div className="flex min-h-[calc(100vh-64px)]  ">
         {/* Sidebar */}
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
@@ -226,7 +226,7 @@ const GetAllJobs: React.FC = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-violet-800 dark:from-gray-100 dark:via-blue-200 dark:to-violet-200 bg-clip-text text-transparent mb-2">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-violet-800 dark:from-gray-100 dark:via-blue-200 dark:to-violet-200 bg-clip-text text-transparent mb-2">
                   All Jobs
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 text-lg">

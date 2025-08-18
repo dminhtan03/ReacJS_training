@@ -221,7 +221,7 @@ const AddJobForm: React.FC = () => {
   return (
     <div className="w-full">
       <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <div className="flex min-h-[calc(100vh-64px)] pt-15 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-4">
+      <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 ">
         {/* Sidebar: Hidden on mobile, visible on tablet/desktop */}
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${

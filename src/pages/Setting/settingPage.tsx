@@ -10,7 +10,7 @@ const SettingsPage: React.FC = () => {
   return (
     <div className="w-full" style={{ height: "100vh" }}>
       <Header />
-      <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 pt-16 mt-4">
+      <div className="flex min-h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 ">
         {/* Sidebar */}
         <div
           className={`fixed inset-y-0 left-0 z-40 transform ${
@@ -33,7 +33,9 @@ const SettingsPage: React.FC = () => {
           className="flex-grow p-6 mx-auto max-w-4xl"
           style={{ height: "100vh" }}
         >
-          <h2 className="text-2xl font-bold mb-6">Theme Settings</h2>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-violet-800 dark:from-gray-100 dark:via-blue-200 dark:to-violet-200 bg-clip-text text-transparent mb-2">
+                  Theme settings
+                </h1>
           <div className="flex items-center gap-4">
             <span>Light</span>
             <button

@@ -573,17 +573,7 @@ const LoginPage: React.FC = () => {
               </form>
             )}
 
-            {/* Forgot Password - Only show on Sign In */}
-            {activeTab === "signin" && (
-              <div className="text-center mt-4">
-                <button
-                  onClick={() => navigate("/forgot-password")}
-                  className="text-sm text-blue-600 cursor-pointer hover:text-blue-700 font-medium transition-colors"
-                >
-                  Forgot your password?
-                </button>
-              </div>
-            )}
+            
           </div>
         </div>
 
