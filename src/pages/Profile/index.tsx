@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import imageCompression from "browser-image-compression";
 import {
   ArrowLeft,
   User,
@@ -24,6 +25,7 @@ interface UserProfile {
   email: string;
   phoneNumber: string;
   department: string;
+  image: string;
   createdAt?: string;
 }
 
@@ -33,10 +35,7 @@ interface ProfilePageProps {
   onBack?: () => void;
 }
 
-const ProfilePage: React.FC<ProfilePageProps> = ({
-  onSave,
-  onBack,
-}) => {
+const ProfilePage: React.FC<ProfilePageProps> = ({ onSave, onBack }) => {
   const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
 
   const userId: string | undefined = reduxState?.auth?.id;
@@ -48,8 +47,11 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
     email: "",
     phoneNumber: "",
     department: "",
+    image: "",
   });
-  const [originalProfile, setOriginalProfile] = useState<UserProfile | null>(null);
+  const [originalProfile, setOriginalProfile] = useState<UserProfile | null>(
+    null
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,11 +72,11 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
           headers: { "Content-Type": "application/json" },
         }
       );
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch user profile");
       }
-      
+
       const userData = await response.json();
       const profileData: UserProfile = {
         id: userData.id || userId,
@@ -83,14 +85,16 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
         email: userData.email || "",
         phoneNumber: userData.phoneNumber || "",
         department: userData.department || "",
+        image: userData.image || "",
         createdAt: userData.createdAt,
       };
-      
+
       setProfile(profileData);
       setOriginalProfile(profileData);
       setErrors({});
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
       setApiError(errorMessage);
       console.error("Error fetching profile:", error);
     } finally {
@@ -105,8 +109,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
         `https://689c2efc58a27b18087d282f.mockapi.io/api/v1/users/signup/${profileData.id}`,
         {
           method: "PUT",
-          headers: { 
-            "Content-Type": "application/json" 
+          headers: {
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             firstName: profileData.firstName,
@@ -114,18 +118,21 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
             email: profileData.email,
             phoneNumber: profileData.phoneNumber,
             department: profileData.department,
+            image: profileData.image,
           }),
         }
       );
-      
+
       if (!response.ok) {
         throw new Error("Failed to update user profile");
       }
-      
+
       const updatedData = await response.json();
       return updatedData;
     } catch (error) {
-      throw error instanceof Error ? error : new Error("Unknown error occurred");
+      throw error instanceof Error
+        ? error
+        : new Error("Unknown error occurred");
     }
   };
 
@@ -138,17 +145,21 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
 
     if (!profile.firstName.trim())
       newErrors.firstName = "First name is required";
-    if (!profile.lastName.trim()) 
-      newErrors.lastName = "Last name is required";
+    if (!profile.lastName.trim()) newErrors.lastName = "Last name is required";
     if (!profile.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(profile.email)) {
       newErrors.email = "Please enter a valid email address";
     }
-    if (!profile.phoneNumber.trim())
+    if (!profile.phoneNumber.trim()) {
       newErrors.phoneNumber = "Phone number is required";
-    if (!profile.department) 
-      newErrors.department = "Department is required";
+    } else if (!/^0\d{9}$/.test(profile.phoneNumber)) {
+      // ^0 : bắt đầu bằng 0
+      // \d{9} : theo sau là 9 chữ số nữa → tổng cộng 10 ký tự
+      newErrors.phoneNumber = "Phone number must be 10 digits and start with 0";
+    }
+
+    if (!profile.department) newErrors.department = "Department is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -167,32 +178,56 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
       }));
     }
   };
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        // Cấu hình nén rất mạnh
+        const options = {
+          maxSizeMB: 0.05, // tối đa ~50KB
+          maxWidthOrHeight: 200, // resize ảnh tối đa 200px
+          useWebWorker: true,
+        };
 
-  const handleSave = async () => {
-  if (!validateForm()) return;
+        // Nén file
+        const compressedFile = await imageCompression(file, options);
 
-  setIsSaving(true);
-  try {
-    // Gọi API update thay vì setTimeout
-    const updatedProfile = await updateProfile(profile);
-
-    if (onSave) {
-      onSave(updatedProfile);
+        // Đọc file nén thành base64
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64Image = reader.result as string;
+          setProfile((prev) => ({ ...prev, image: base64Image }));
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error("Image compression error:", error);
+      }
     }
+  };
+  const handleSave = async () => {
+    if (!validateForm()) return;
 
-    setProfile(updatedProfile);
-    setOriginalProfile(updatedProfile);
-    setIsEditing(false);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  } catch (error) {
-    console.error("Error saving profile:", error);
-    setApiError("Unable to save information. Please try again.");
-  } finally {
-    setIsSaving(false);
-  }
-};
+    setIsSaving(true);
+    try {
+      // Gọi API update thay vì setTimeout
+      const updatedProfile = await updateProfile(profile);
 
+      if (onSave) {
+        onSave(updatedProfile);
+      }
+
+      setProfile(updatedProfile);
+      setOriginalProfile(updatedProfile);
+      setIsEditing(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      setApiError("Unable to save information. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleCancel = () => {
     if (originalProfile) {
@@ -203,7 +238,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
   };
 
   const getInitials = () => {
-    return `${profile.firstName?.charAt(0) || ""}${profile.lastName?.charAt(0) || ""}`.toUpperCase();
+    return `${profile.firstName?.charAt(0) || ""}${
+      profile.lastName?.charAt(0) || ""
+    }`.toUpperCase();
   };
 
   const handleBackClick = () => {
@@ -217,10 +254,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
   const formatDate = (dateString?: string) => {
     if (!dateString) return "Not specified";
     try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
     } catch {
       return "Not specified";
@@ -254,9 +291,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
             Data Loading Error
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            {apiError}
-          </p>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">{apiError}</p>
           <div className="space-y-3">
             <button
               onClick={handleRetry}
@@ -296,9 +331,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-4 flex items-center space-x-3">
             <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-            <p className="text-red-700 dark:text-red-300 text-sm">
-              {apiError}
-            </p>
+            <p className="text-red-700 dark:text-red-300 text-sm">{apiError}</p>
             <button
               onClick={() => setApiError("")}
               className="text-red-500 hover:text-red-700 ml-auto"
@@ -310,16 +343,17 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
       )}
 
       <div className="flex min-h-[calc(100vh-80px)]">
-        <div className={`fixed inset-y-0 left-0 z-40 transform ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out`}>
+        <div
+          className={`fixed inset-y-0 left-0 z-40 transform ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0 md:static md:flex transition-transform duration-300 ease-in-out`}
+        >
           <Sidebar />
         </div>
 
         {/* Main Content */}
         <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
             {/* Profile Card */}
             <div className="lg:col-span-1">
               <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
@@ -327,22 +361,49 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                 <div className="relative bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 p-8 text-white">
                   <div className="text-center">
                     <div className="relative inline-block mb-4">
-                      <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-4 border-white/30 shadow-2xl">
-                        <span className="text-3xl font-bold text-white">
-                          {getInitials()}
-                        </span>
+                      <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border-4 border-white/30 shadow-2xl overflow-hidden">
+                        {profile.image ? (
+                          <img
+                            src={profile.image}
+                            alt="Avatar"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-3xl font-bold text-white">
+                            {getInitials()}
+                          </span>
+                        )}
                       </div>
-                      <button className="absolute -bottom-2 -right-2 bg-white/20 backdrop-blur-md p-2 rounded-full border-2 border-white/30 hover:bg-white/30 transition-colors">
+
+                      {/* Camera button */}
+                      <label
+                        className={`absolute -bottom-2 -right-2 p-2 rounded-full border-2 border-white/30 transition-colors cursor-pointer ${
+                          isEditing
+                            ? "bg-white/20 hover:bg-white/30"
+                            : "bg-gray-400/40 cursor-not-allowed"
+                        }`}
+                      >
                         <Camera className="w-4 h-4 text-white" />
-                      </button>
+                        {isEditing && (
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              handleFileChange(e);
+                            }}
+                            className="hidden"
+                          />
+                        )}
+                      </label>
                     </div>
+
                     <h2 className="text-2xl font-bold mb-1">
                       {profile.firstName} {profile.lastName}
                     </h2>
                     <p className="text-white/80">{profile.department}</p>
                     {/* <p className="text-white/60 text-sm mt-1">ID: {profile.id}</p> */}
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-br from-violet-600/20 to-purple-600/20" />
+                  {/* <div className="absolute inset-0 bg-gradient-to-br from-violet-600/20 to-purple-600/20" /> */}
                 </div>
 
                 {/* Quick Stats */}
@@ -351,17 +412,21 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                     <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl">
                       <div className="flex items-center gap-3">
                         <Shield className="w-5 h-5 text-blue-600" />
-                        <span className="font-medium text-gray-700 dark:text-gray-300">Account Status</span>
+                        <span className="font-medium text-gray-700 dark:text-gray-300">
+                          Account Status
+                        </span>
                       </div>
                       <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-semibold">
                         Active
                       </span>
                     </div>
-                    
+
                     <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl">
                       <div className="flex items-center gap-3">
                         <Calendar className="w-5 h-5 text-purple-600" />
-                        <span className="font-medium text-gray-700 dark:text-gray-300">Member Since</span>
+                        <span className="font-medium text-gray-700 dark:text-gray-300">
+                          Member Since
+                        </span>
                       </div>
                       <span className="text-sm text-gray-600 dark:text-gray-400">
                         {formatDate(profile.createdAt)}
@@ -383,10 +448,12 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                         {isEditing ? "Edit Profile" : "User Profile"}
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        {isEditing ? "Update your personal information" : "View and manage your profile information"}
+                        {isEditing
+                          ? "Update your personal information"
+                          : "View and manage your profile information"}
                       </p>
                     </div>
-                    
+
                     {!isEditing && (
                       <button
                         onClick={() => setIsEditing(true)}
@@ -502,7 +569,8 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                               Editing Profile
                             </h4>
                             <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                              Make changes to your profile information. All fields marked with * are required.
+                              Make changes to your profile information. All
+                              fields marked with * are required.
                             </p>
                           </div>
                         </div>
@@ -518,7 +586,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                           <input
                             type="text"
                             value={profile.firstName}
-                            onChange={(e) => handleInputChange("firstName", e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange("firstName", e.target.value)
+                            }
                             className={`w-full px-4 py-4 border-2 rounded-2xl text-gray-700 dark:text-white transition-all duration-200 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none ${
                               errors.firstName
                                 ? "border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50 dark:bg-red-900/20"
@@ -542,7 +612,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                           <input
                             type="text"
                             value={profile.lastName}
-                            onChange={(e) => handleInputChange("lastName", e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange("lastName", e.target.value)
+                            }
                             className={`w-full px-4 py-4 border-2 rounded-2xl text-gray-700 dark:text-white transition-all duration-200 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none ${
                               errors.lastName
                                 ? "border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50 dark:bg-red-900/20"
@@ -566,7 +638,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                           <input
                             type="email"
                             value={profile.email}
-                            onChange={(e) => handleInputChange("email", e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange("email", e.target.value)
+                            }
                             className={`w-full px-4 py-4 border-2 rounded-2xl text-gray-700 dark:text-white transition-all duration-200 focus:ring-4 focus:ring-green-500/20 focus:border-green-500 outline-none ${
                               errors.email
                                 ? "border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50 dark:bg-red-900/20"
@@ -590,7 +664,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                           <input
                             type="tel"
                             value={profile.phoneNumber}
-                            onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange("phoneNumber", e.target.value)
+                            }
                             className={`w-full px-4 py-4 border-2 rounded-2xl text-gray-700 dark:text-white transition-all duration-200 focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none ${
                               errors.phoneNumber
                                 ? "border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50 dark:bg-red-900/20"
@@ -613,7 +689,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                           </label>
                           <select
                             value={profile.department}
-                            onChange={(e) => handleInputChange("department", e.target.value)}
+                            onChange={(e) =>
+                              handleInputChange("department", e.target.value)
+                            }
                             className={`w-full px-4 py-4 border-2 rounded-2xl text-gray-700 dark:text-white transition-all duration-200 focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 outline-none appearance-none cursor-pointer ${
                               errors.department
                                 ? "border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-red-50 dark:bg-red-900/20"
@@ -621,8 +699,12 @@ const ProfilePage: React.FC<ProfilePageProps> = ({
                             }`}
                           >
                             <option value="">Select your department</option>
-                            <option value="Information Technology">Information Technology</option>
-                            <option value="Human Resources">Human Resources</option>
+                            <option value="Information Technology">
+                              Information Technology
+                            </option>
+                            <option value="Human Resources">
+                              Human Resources
+                            </option>
                             <option value="Finance">Finance</option>
                             <option value="Marketing">Marketing</option>
                             <option value="Sales">Sales</option>

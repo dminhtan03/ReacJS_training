@@ -4,16 +4,29 @@ import Header from "../../components/Layout/Header";
 import JobCard from "@/components/ui/JobCard";
 import Sidebar from "../../components/Layout/Sidebar";
 import ConfirmModal from "../../components/Layout/ConfirmModal";
-import { Check, X, Search, Filter, Plus, Calendar, TrendingDown, TrendingUp, Briefcase, Users, Download, FileText } from "lucide-react";
+import {
+  Check,
+  X,
+  Search,
+  Filter,
+  Plus,
+  Calendar,
+  TrendingDown,
+  TrendingUp,
+  Briefcase,
+  Users,
+  Download,
+  FileText,
+} from "lucide-react";
 import * as jobService from "../../service/jobService";
 import EditJobModal from "../../components/Layout/EditJobModal";
 import ScrollToTopButton from "@/components/Layout/ScrollToTop";
 
 // Import jsPDF - Method that works
-import jsPDF from 'jspdf';
+import jsPDF from "jspdf";
 
 // Declare autoTable interface
-declare module 'jspdf' {
+declare module "jspdf" {
   interface jsPDF {
     autoTable: (options: any) => jsPDF;
     lastAutoTable?: {
@@ -23,8 +36,7 @@ declare module 'jspdf' {
 }
 
 // Import autoTable plugin
-import 'jspdf-autotable';
-
+import "jspdf-autotable";
 
 interface JobFormData {
   id: string;
@@ -49,16 +61,28 @@ const DashboardPage: React.FC = () => {
   const [editJobId, setEditJobId] = useState<string | null>(null);
   const [editUserId, setEditUserId] = useState<string | null>(null);
   const [showPdfModal, setShowPdfModal] = useState(false);
-  
+
   const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
   const userId: string | undefined = reduxState?.auth?.id;
   const userRole: string | undefined = reduxState?.auth?.role;
   const userName: string | undefined = reduxState?.auth?.name || "User";
-  
+
   const statusOptions = [
-    { value: "Pending", label: "⏳ Pending", color: "bg-amber-100 text-amber-700" },
-    { value: "Approved", label: "✅ Approved", color: "bg-green-100 text-green-700" },
-    { value: "Rejected", label: "❌ Rejected", color: "bg-red-100 text-red-700" },
+    {
+      value: "Pending",
+      label: "⏳ Pending",
+      color: "bg-amber-100 text-amber-700",
+    },
+    {
+      value: "Approved",
+      label: "✅ Approved",
+      color: "bg-green-100 text-green-700",
+    },
+    {
+      value: "Rejected",
+      label: "❌ Rejected",
+      color: "bg-red-100 text-red-700",
+    },
   ];
   const [toast, setToast] = useState<{
     message: string;
@@ -70,12 +94,14 @@ const DashboardPage: React.FC = () => {
 
   // Simple PDF Export Function (without autoTable - guaranteed to work)
   const exportToPDFSimple = (status: string) => {
-    const filteredJobsForPdf = visibleJobs.filter(job => job.status === status);
-    
+    const filteredJobsForPdf = visibleJobs.filter(
+      (job) => job.status === status
+    );
+
     if (filteredJobsForPdf.length === 0) {
-      setToast({ 
-        message: `No ${status.toLowerCase()} jobs found to export!`, 
-        type: "error" 
+      setToast({
+        message: `No ${status.toLowerCase()} jobs found to export!`,
+        type: "error",
       });
       return;
     }
@@ -84,15 +110,16 @@ const DashboardPage: React.FC = () => {
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.width;
       const pageHeight = doc.internal.pageSize.height;
-      
+
       // Colors
-      const primaryColor = status === "Approved" ? [34, 197, 94] : [239, 68, 68];
+      const primaryColor =
+        status === "Approved" ? [34, 197, 94] : [239, 68, 68];
       const margin = 20;
 
       // Header with background
       doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.rect(0, 0, pageWidth, 30, 'F');
-      
+      doc.rect(0, 0, pageWidth, 30, "F");
+
       // Title
       doc.setFontSize(20);
       doc.setTextColor(255, 255, 255);
@@ -101,34 +128,38 @@ const DashboardPage: React.FC = () => {
 
       // Date and user info
       doc.setFontSize(10);
-      doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth - 70, 15);
+      doc.text(
+        `Generated: ${new Date().toLocaleDateString()}`,
+        pageWidth - 70,
+        15
+      );
       doc.text(`By: ${userName}`, pageWidth - 70, 22);
 
       let yPos = 50;
-      
+
       // Summary stats
       doc.setTextColor(0, 0, 0);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(14);
       doc.text("Summary Statistics", margin, yPos);
-      
+
       yPos += 10;
       doc.setFont("helvetica", "normal");
       doc.setFontSize(11);
-      
+
       const stats = {
         total: filteredJobsForPdf.length,
-        thisMonth: filteredJobsForPdf.filter(job => 
-          new Date(job.dateAdded).getMonth() === new Date().getMonth()
+        thisMonth: filteredJobsForPdf.filter(
+          (job) => new Date(job.dateAdded).getMonth() === new Date().getMonth()
         ).length,
-        thisWeek: filteredJobsForPdf.filter(job => {
+        thisWeek: filteredJobsForPdf.filter((job) => {
           const jobDate = new Date(job.dateAdded);
           const weekAgo = new Date();
           weekAgo.setDate(weekAgo.getDate() - 7);
           return jobDate >= weekAgo;
-        }).length
+        }).length,
       };
-      
+
       doc.text(`• Total ${status} Applications: ${stats.total}`, margin, yPos);
       yPos += 7;
       doc.text(`• This Month: ${stats.thisMonth}`, margin, yPos);
@@ -156,36 +187,43 @@ const DashboardPage: React.FC = () => {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(12);
         doc.text(`${index + 1}. ${job.company}`, margin, yPos);
-        
+
         // Position
         yPos += 8;
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
         doc.text(`Position: ${job.position}`, margin + 5, yPos);
-        
+
         // Employee
         yPos += 6;
-        doc.text(`Employee: ${job.employeeName || 'N/A'}`, margin + 5, yPos);
-        
+        doc.text(`Employee: ${job.employeeName || "N/A"}`, margin + 5, yPos);
+
         // Date
         yPos += 6;
-        doc.text(`Date Applied: ${new Date(job.dateAdded).toLocaleDateString()}`, margin + 5, yPos);
-        
+        doc.text(
+          `Date Applied: ${new Date(job.dateAdded).toLocaleDateString()}`,
+          margin + 5,
+          yPos
+        );
+
         // Status with color
         yPos += 6;
         doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setFont("helvetica", "bold");
         doc.text(`Status: ${job.status}`, margin + 5, yPos);
-        
+
         // Notes
         doc.setTextColor(0, 0, 0);
         doc.setFont("helvetica", "normal");
         if (job.notes && job.notes.trim()) {
           yPos += 6;
-          const notes = job.notes.length > 80 ? job.notes.substring(0, 80) + '...' : job.notes;
+          const notes =
+            job.notes.length > 80
+              ? job.notes.substring(0, 80) + "..."
+              : job.notes;
           doc.text(`Notes: ${notes}`, margin + 5, yPos);
         }
-        
+
         // Separator line
         yPos += 10;
         doc.setDrawColor(200, 200, 200);
@@ -203,18 +241,24 @@ const DashboardPage: React.FC = () => {
         yPos += 15;
 
         const companyCount: { [key: string]: number } = {};
-        filteredJobsForPdf.forEach(job => {
+        filteredJobsForPdf.forEach((job) => {
           companyCount[job.company] = (companyCount[job.company] || 0) + 1;
         });
-        
+
         const topCompanies = Object.entries(companyCount)
-          .sort(([,a], [,b]) => b - a)
+          .sort(([, a], [, b]) => b - a)
           .slice(0, 5);
-        
+
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
         topCompanies.forEach(([company, count], index) => {
-          doc.text(`${index + 1}. ${company}: ${count} application${count > 1 ? 's' : ''}`, margin + 5, yPos);
+          doc.text(
+            `${index + 1}. ${company}: ${count} application${
+              count > 1 ? "s" : ""
+            }`,
+            margin + 5,
+            yPos
+          );
           yPos += 6;
         });
       }
@@ -229,54 +273,57 @@ const DashboardPage: React.FC = () => {
           `Page ${i} of ${totalPages} | Job Tracker System | Confidential Document`,
           pageWidth / 2,
           pageHeight - 10,
-          { align: 'center' }
+          { align: "center" }
         );
       }
 
       // Save the PDF
-      const fileName = `${status.toLowerCase()}_jobs_${new Date().toISOString().split('T')[0]}.pdf`;
+      const fileName = `${status.toLowerCase()}_jobs_${
+        new Date().toISOString().split("T")[0]
+      }.pdf`;
       doc.save(fileName);
-      
-      setToast({ 
-        message: `PDF exported successfully: ${fileName}`, 
-        type: "success" 
-      });
 
+      setToast({
+        message: `PDF exported successfully: ${fileName}`,
+        type: "success",
+      });
     } catch (error) {
-      console.error('PDF Export Error:', error);
-      setToast({ 
-        message: `Failed to export PDF: ${error}`, 
-        type: "error" 
+      console.error("PDF Export Error:", error);
+      setToast({
+        message: `Failed to export PDF: ${error}`,
+        type: "error",
       });
     }
   };
 
   // Advanced PDF Export with autoTable (fallback to simple if it fails)
   const exportToPDF = (status: string) => {
-    const filteredJobsForPdf = visibleJobs.filter(job => job.status === status);
-    
+    const filteredJobsForPdf = visibleJobs.filter(
+      (job) => job.status === status
+    );
+
     if (filteredJobsForPdf.length === 0) {
-      setToast({ 
-        message: `No ${status.toLowerCase()} jobs found to export!`, 
-        type: "error" 
+      setToast({
+        message: `No ${status.toLowerCase()} jobs found to export!`,
+        type: "error",
       });
       return;
     }
 
     try {
       const doc = new jsPDF();
-      
+
       // Check if autoTable is available
-      if (typeof doc.autoTable === 'function') {
+      if (typeof doc.autoTable === "function") {
         // Use advanced version with table
         exportToPDFWithTable(status);
       } else {
         // Fallback to simple version
-        console.warn('autoTable not available, using simple PDF export');
+        console.warn("autoTable not available, using simple PDF export");
         exportToPDFSimple(status);
       }
     } catch (error) {
-      console.error('PDF Export Error:', error);
+      console.error("PDF Export Error:", error);
       // Always fallback to simple version
       exportToPDFSimple(status);
     }
@@ -284,12 +331,14 @@ const DashboardPage: React.FC = () => {
 
   // Advanced PDF with Table
   const exportToPDFWithTable = (status: string) => {
-    const filteredJobsForPdf = visibleJobs.filter(job => job.status === status);
-    
+    const filteredJobsForPdf = visibleJobs.filter(
+      (job) => job.status === status
+    );
+
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.width;
     const pageHeight = doc.internal.pageSize.height;
-    
+
     // Colors
     const primaryColor = status === "Approved" ? [34, 197, 94] : [239, 68, 68];
     const secondaryColor = [99, 102, 241];
@@ -298,11 +347,11 @@ const DashboardPage: React.FC = () => {
 
     // Header Design
     doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-    doc.rect(0, 0, pageWidth, 35, 'F');
+    doc.rect(0, 0, pageWidth, 35, "F");
 
     // Company Logo placeholder
     doc.setFillColor(255, 255, 255);
-    doc.circle(25, 17.5, 8, 'F');
+    doc.circle(25, 17.5, 8, "F");
     doc.setFontSize(12);
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
     doc.text("JT", 22, 20);
@@ -316,59 +365,82 @@ const DashboardPage: React.FC = () => {
     // Subheader
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
-    doc.text(`Generated on ${new Date().toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })}`, 45, 28);
+    doc.text(
+      `Generated on ${new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`,
+      45,
+      28
+    );
 
     // User info
     doc.setFontSize(10);
     doc.text(`Prepared by: ${userName}`, pageWidth - 60, 20);
-    doc.text(`Total ${status} Jobs: ${filteredJobsForPdf.length}`, pageWidth - 60, 28);
+    doc.text(
+      `Total ${status} Jobs: ${filteredJobsForPdf.length}`,
+      pageWidth - 60,
+      28
+    );
 
     // Summary Statistics Box
     let yPosition = 50;
     doc.setFillColor(lightGray[0], lightGray[1], lightGray[2]);
-    doc.roundedRect(15, yPosition, pageWidth - 30, 25, 3, 3, 'F');
-    
+    doc.roundedRect(15, yPosition, pageWidth - 30, 25, 3, 3, "F");
+
     doc.setFontSize(14);
     doc.setTextColor(textColor[0], textColor[1], textColor[2]);
     doc.setFont("helvetica", "bold");
     doc.text("Summary Statistics", 20, yPosition + 10);
-    
+
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     const stats = {
       total: filteredJobsForPdf.length,
-      thisMonth: filteredJobsForPdf.filter(job => 
-        new Date(job.dateAdded).getMonth() === new Date().getMonth()
+      thisMonth: filteredJobsForPdf.filter(
+        (job) => new Date(job.dateAdded).getMonth() === new Date().getMonth()
       ).length,
-      thisWeek: filteredJobsForPdf.filter(job => {
+      thisWeek: filteredJobsForPdf.filter((job) => {
         const jobDate = new Date(job.dateAdded);
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
         return jobDate >= weekAgo;
-      }).length
+      }).length,
     };
-    
-    doc.text(`• Total ${status} Applications: ${stats.total}`, 20, yPosition + 17);
+
+    doc.text(
+      `• Total ${status} Applications: ${stats.total}`,
+      20,
+      yPosition + 17
+    );
     doc.text(`• This Month: ${stats.thisMonth}`, 100, yPosition + 17);
     doc.text(`• This Week: ${stats.thisWeek}`, 150, yPosition + 17);
 
     yPosition += 40;
 
     // Table data
-    const tableHeaders = ['#', 'Company', 'Position', 'Employee', 'Date Applied', 'Notes'];
+    const tableHeaders = [
+      "#",
+      "Company",
+      "Position",
+      "Employee",
+      "Date Applied",
+      "Notes",
+    ];
     const tableData = filteredJobsForPdf.map((job, index) => [
       (index + 1).toString(),
       job.company,
       job.position,
-      job.employeeName || 'N/A',
+      job.employeeName || "N/A",
       new Date(job.dateAdded).toLocaleDateString(),
-      job.notes ? (job.notes.length > 30 ? job.notes.substring(0, 30) + '...' : job.notes) : 'No notes'
+      job.notes
+        ? job.notes.length > 30
+          ? job.notes.substring(0, 30) + "..."
+          : job.notes
+        : "No notes",
     ]);
 
     // AutoTable configuration
@@ -376,32 +448,32 @@ const DashboardPage: React.FC = () => {
       startY: yPosition,
       head: [tableHeaders],
       body: tableData,
-      theme: 'striped',
+      theme: "striped",
       headStyles: {
         fillColor: primaryColor,
         textColor: [255, 255, 255],
         fontSize: 11,
-        fontStyle: 'bold',
-        halign: 'center'
+        fontStyle: "bold",
+        halign: "center",
       },
       bodyStyles: {
         fontSize: 9,
         cellPadding: 4,
-        textColor: textColor
+        textColor: textColor,
       },
       alternateRowStyles: {
-        fillColor: [249, 250, 251]
+        fillColor: [249, 250, 251],
       },
       columnStyles: {
-        0: { halign: 'center', cellWidth: 15 },
+        0: { halign: "center", cellWidth: 15 },
         1: { cellWidth: 35 },
         2: { cellWidth: 40 },
         3: { cellWidth: 30 },
-        4: { halign: 'center', cellWidth: 25 },
-        5: { cellWidth: 45 }
+        4: { halign: "center", cellWidth: 25 },
+        5: { cellWidth: 45 },
       },
       margin: { left: 15, right: 15 },
-      didDrawPage: function(data: any) {
+      didDrawPage: function (data: any) {
         // Footer
         doc.setFontSize(8);
         doc.setTextColor(128, 128, 128);
@@ -409,55 +481,63 @@ const DashboardPage: React.FC = () => {
           `Page ${data.pageNumber} | Job Tracker System | Confidential Document`,
           pageWidth / 2,
           pageHeight - 10,
-          { align: 'center' }
+          { align: "center" }
         );
-      }
+      },
     });
 
     // Additional Details Section
     const finalY = doc.lastAutoTable?.finalY || yPosition + 50;
     if (finalY < pageHeight - 80) {
       yPosition = finalY + 20;
-      
+
       // Insights Section
       doc.setFillColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
-      doc.rect(15, yPosition, pageWidth - 30, 8, 'F');
-      
+      doc.rect(15, yPosition, pageWidth - 30, 8, "F");
+
       doc.setFontSize(12);
       doc.setTextColor(255, 255, 255);
       doc.setFont("helvetica", "bold");
       doc.text("Quick Insights", 20, yPosition + 5.5);
-      
+
       yPosition += 15;
       doc.setFontSize(9);
       doc.setTextColor(textColor[0], textColor[1], textColor[2]);
       doc.setFont("helvetica", "normal");
-      
+
       // Top companies
       const companyCount: { [key: string]: number } = {};
-      filteredJobsForPdf.forEach(job => {
+      filteredJobsForPdf.forEach((job) => {
         companyCount[job.company] = (companyCount[job.company] || 0) + 1;
       });
-      
+
       const topCompanies = Object.entries(companyCount)
-        .sort(([,a], [,b]) => b - a)
+        .sort(([, a], [, b]) => b - a)
         .slice(0, 3);
-      
+
       if (topCompanies.length > 0) {
         doc.text("Top Companies:", 20, yPosition);
         topCompanies.forEach(([company, count], index) => {
-          doc.text(`${index + 1}. ${company} (${count} application${count > 1 ? 's' : ''})`, 25, yPosition + 8 + (index * 6));
+          doc.text(
+            `${index + 1}. ${company} (${count} application${
+              count > 1 ? "s" : ""
+            })`,
+            25,
+            yPosition + 8 + index * 6
+          );
         });
       }
     }
 
     // Save the PDF
-    const fileName = `${status.toLowerCase()}_jobs_${new Date().toISOString().split('T')[0]}.pdf`;
+    const fileName = `${status.toLowerCase()}_jobs_${
+      new Date().toISOString().split("T")[0]
+    }.pdf`;
     doc.save(fileName);
-    
-    setToast({ 
-      message: `PDF exported successfully: ${fileName}`, 
-      type: "success" 
+
+    setToast({
+      message: `PDF exported successfully: ${fileName}`,
+      type: "success",
     });
   };
 
@@ -468,8 +548,12 @@ const DashboardPage: React.FC = () => {
   }> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
-    const approvedJobs = visibleJobs.filter(job => job.status === "Approved").length;
-    const rejectedJobs = visibleJobs.filter(job => job.status === "Rejected").length;
+    const approvedJobs = visibleJobs.filter(
+      (job) => job.status === "Approved"
+    ).length;
+    const rejectedJobs = visibleJobs.filter(
+      (job) => job.status === "Rejected"
+    ).length;
 
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -526,7 +610,9 @@ const DashboardPage: React.FC = () => {
                   <span className="text-2xl font-bold text-green-600 dark:text-green-400">
                     {approvedJobs}
                   </span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">jobs</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    jobs
+                  </p>
                 </div>
               </div>
             </button>
@@ -561,7 +647,9 @@ const DashboardPage: React.FC = () => {
                   <span className="text-2xl font-bold text-red-600 dark:text-red-400">
                     {rejectedJobs}
                   </span>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">jobs</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    jobs
+                  </p>
                 </div>
               </div>
             </button>
@@ -600,7 +688,13 @@ const DashboardPage: React.FC = () => {
         }`}
       >
         <div className="flex items-center">
-          <div className={`p-1 rounded-full mr-3 ${type === "success" ? "bg-emerald-100 dark:bg-emerald-800" : "bg-red-100 dark:bg-red-800"}`}>
+          <div
+            className={`p-1 rounded-full mr-3 ${
+              type === "success"
+                ? "bg-emerald-100 dark:bg-emerald-800"
+                : "bg-red-100 dark:bg-red-800"
+            }`}
+          >
             {type === "success" ? (
               <Check className="w-4 h-4" />
             ) : (
@@ -681,9 +775,9 @@ const DashboardPage: React.FC = () => {
   // Statistics
   const stats = {
     total: visibleJobs.length,
-    pending: visibleJobs.filter(job => job.status === "Pending").length,
-    approved: visibleJobs.filter(job => job.status === "Approved").length,
-    rejected: visibleJobs.filter(job => job.status === "Rejected").length,
+    pending: visibleJobs.filter((job) => job.status === "Pending").length,
+    approved: visibleJobs.filter((job) => job.status === "Approved").length,
+    rejected: visibleJobs.filter((job) => job.status === "Rejected").length,
   };
 
   // Pagination
@@ -737,24 +831,46 @@ const DashboardPage: React.FC = () => {
                 <button
                   onClick={() => setShowPdfModal(true)}
                   disabled={stats.approved === 0 && stats.rejected === 0}
-                  className={`group bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold text-sm sm:text-base inline-flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] ${
-                    stats.approved === 0 && stats.rejected === 0 
-                      ? "opacity-50 cursor-not-allowed" 
-                      : ""
-                  }`}
+                  className={`
+                  relative overflow-hidden
+                 bg-gradient-to-r from-blue-600 to-indigo-600 
+                   hover:from-blue-700 hover:to-indigo-700 
+                 text-white px-6 py-3 rounded-xl font-semibold text-sm sm:text-base 
+                 inline-flex items-center gap-2 
+                shadow-lg hover:shadow-xl 
+                  transition-all duration-200 ease-out
+                  hover:scale-105 active:scale-95
+        ${
+          stats.approved === 0 && stats.rejected === 0
+            ? "opacity-50 cursor-not-allowed"
+            : "cursor-pointer"
+        }
+      `}
                 >
-                  <Download className="w-5 h-5 transition-transform group-hover:translate-y-0.5" />
+                  <Download className="w-5 h-5 transition-transform duration-200 ease-out hover:translate-y-0.5" />
                   Export PDF
-                  <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  {/* Shine effect on hover */}
+                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent hover:translate-x-full transition-transform duration-700 ease-out pointer-events-none" />
                 </button>
 
                 <Link
                   to="/add-job"
-                  className="group bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold text-sm sm:text-base inline-flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="
+        relative overflow-hidden
+        bg-gradient-to-r from-violet-600 to-purple-600 
+        hover:from-violet-700 hover:to-purple-700 
+        text-white px-6 py-3 rounded-xl font-semibold text-sm sm:text-base 
+        inline-flex items-center gap-2 
+        shadow-lg hover:shadow-xl 
+        transition-all duration-200 ease-out
+        hover:scale-105 active:scale-95
+        cursor-pointer
+      "
                 >
-                  <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
+                  <Plus className="w-5 h-5 transition-transform duration-200 ease-out hover:rotate-90" />
                   Add New Job
-                  <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  {/* Shine effect on hover */}
+                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent hover:translate-x-full transition-transform duration-700 ease-out pointer-events-none" />
                 </Link>
               </div>
             </div>
@@ -764,8 +880,12 @@ const DashboardPage: React.FC = () => {
               <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Jobs</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.total}</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Total Jobs
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                      {stats.total}
+                    </p>
                   </div>
                   <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                     <Briefcase className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -776,8 +896,12 @@ const DashboardPage: React.FC = () => {
               <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending</p>
-                    <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">{stats.pending}</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Pending
+                    </p>
+                    <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">
+                      {stats.pending}
+                    </p>
                   </div>
                   <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
                     <Calendar className="w-6 h-6 text-amber-600 dark:text-amber-400" />
@@ -788,8 +912,12 @@ const DashboardPage: React.FC = () => {
               <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Approved</p>
-                    <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">{stats.approved}</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Approved
+                    </p>
+                    <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+                      {stats.approved}
+                    </p>
                   </div>
                   <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
                     <Check className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
@@ -800,8 +928,12 @@ const DashboardPage: React.FC = () => {
               <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 shadow-sm hover:shadow-md transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Rejected</p>
-                    <p className="text-2xl font-bold text-red-700 dark:text-red-400">{stats.rejected}</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Rejected
+                    </p>
+                    <p className="text-2xl font-bold text-red-700 dark:text-red-400">
+                      {stats.rejected}
+                    </p>
                   </div>
                   <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
                     <X className="w-6 h-6 text-red-600 dark:text-red-400" />
@@ -838,7 +970,7 @@ const DashboardPage: React.FC = () => {
                     }}
                   >
                     <option value="">All Status</option>
-                    {statusOptions.map(option => (
+                    {statusOptions.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
@@ -898,8 +1030,7 @@ const DashboardPage: React.FC = () => {
                   <p className="text-gray-500 dark:text-gray-400 mb-4">
                     {searchTerm || filterStatus
                       ? "Try adjusting your search or filter criteria"
-                      : "Start by adding your first job application"
-                    }
+                      : "Start by adding your first job application"}
                   </p>
                   {!searchTerm && !filterStatus && (
                     <Link
@@ -919,7 +1050,9 @@ const DashboardPage: React.FC = () => {
           {totalPages > 1 && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 shadow-sm">
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, visibleJobs.length)} of {visibleJobs.length} jobs
+                Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+                {Math.min(currentPage * itemsPerPage, visibleJobs.length)} of{" "}
+                {visibleJobs.length} jobs
               </div>
 
               <div className="flex items-center space-x-2">
@@ -944,7 +1077,9 @@ const DashboardPage: React.FC = () => {
                         {index > 0 &&
                           filtered[index - 1] !== page - 1 &&
                           page !== 1 && (
-                            <span className="px-2 text-gray-400 dark:text-gray-500">...</span>
+                            <span className="px-2 text-gray-400 dark:text-gray-500">
+                              ...
+                            </span>
                           )}
                         <button
                           onClick={() => goToPage(page)}

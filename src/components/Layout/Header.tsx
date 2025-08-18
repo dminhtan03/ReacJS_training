@@ -26,6 +26,8 @@ interface ProfileFormData {
   email: string;
   phoneNumber: string;
   department: string;
+  image: string;
+  createdAt?: string;
 }
 
 const Header: React.FC = () => {
@@ -36,16 +38,67 @@ const Header: React.FC = () => {
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [errors, setErrors] = useState<Partial<ProfileFormData>>({});
+  const [apiError, setApiError] = useState<string>("");
+
+  const [profile, setProfile] = useState<ProfileFormData>({
+    userId: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    department: "",
+    image: "",
+  });
+
   const dropdownRef = useRef<HTMLDivElement>(null);
   const reduxState = JSON.parse(localStorage.getItem("reduxState") || "{}");
   const userId: string | undefined = reduxState?.auth?.id;
   const role: string | undefined = reduxState?.auth?.role;
   const dispatch = useDispatch();
 
-  const { firstName, isAuthenticated } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const fetchProfile = async (userId: string) => {
+    try {
+      setIsLoading(true);
+      setApiError("");
+      const response = await fetch(
+        `https://689c2efc58a27b18087d282f.mockapi.io/api/v1/users/signup/${userId}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
+      if (!response.ok) {
+        throw new Error("Failed to fetch user profile");
+      }
+
+      const userData = await response.json();
+      const profileData: ProfileFormData = {
+        userId: userData.id || userId,
+        firstName: userData.firstName || "",
+        lastName: userData.lastName || "",
+        email: userData.email || "",
+        phoneNumber: userData.phoneNumber || "",
+        department: userData.department || "",
+        image: userData.image || "",
+        createdAt: userData.createdAt,
+      };
+
+      setProfile(profileData);
+      setErrors({});
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
+      setApiError(errorMessage);
+      console.error("Error fetching profile:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const firstName = profile.firstName;
   // Handle scroll effect for header
   useEffect(() => {
     const handleScroll = () => {
@@ -69,6 +122,10 @@ const Header: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    fetchProfile(userId);
+  }, [userId]);
+
   const handleLogout = () => {
     dispatch(logout());
     setIsDropdownOpen(false);
@@ -78,18 +135,6 @@ const Header: React.FC = () => {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const handleProfileClick = async (userId: string) => {
-    try {
-      const userProfile = await authService.profile(userId);
-      console.log("User Profile:", userProfile);
-      setShowProfile(userProfile);
-      setProfileModalOpen(true);
-      setIsDropdownOpen(false);
-    } catch (error) {
-      console.error("Failed to fetch user profile:", error);
-    }
   };
 
   const handleSaveProfile = async (profileData: ProfileFormData) => {
@@ -211,15 +256,27 @@ const Header: React.FC = () => {
                       }`}
                     >
                       <div className="relative">
-                        <div className="w-10 h-10 bg-gradient-to-br from-violet-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-lg">
-                          {firstName.charAt(0).toUpperCase()}
-                        </div>
+                        {profile.image ? (
+                          <img
+                            src={profile.image}
+                            alt="Avatar"
+                            className="w-10 h-10 rounded-full object-cover shadow-lg"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-gradient-to-br from-violet-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-lg">
+                            {firstName.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+
+                        {/* dấu trạng thái online */}
                         <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800" />
                       </div>
+
                       <div className="text-left hidden xl:block">
                         <p className="text-sm font-semibold">Hello !</p>
                         <p className="text-xs opacity-75">{firstName}</p>
                       </div>
+
                       <ChevronDown
                         className={`w-4 h-4 transition-transform duration-300 ${
                           isDropdownOpen ? "rotate-180" : ""
